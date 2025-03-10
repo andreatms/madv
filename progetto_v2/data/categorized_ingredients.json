@@ -1,0 +1,1190 @@
+[
+    {
+        "ingredient": "Beef",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Flour",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Rapeseed Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Red Wine",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Beef Stock",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Onion",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Carrot",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Thyme",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Mustard",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Egg Yolks",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Puff Pastry",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Beans",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Butter",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Salt",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Pepper",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Olive Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Shallots",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Garlic",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Bacon",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Bay Leaf",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Stout",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Oysters",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Egg",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Goose Fat",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Challots",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mushrooms",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Bouquet Garni",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tomato Puree",
+        "category": "Sauces and Condiments"
+    },
+    {
+        "ingredient": "Celery",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Rosemary",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cardamom",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Potato",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Leek",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Swede",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Parsley",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Baking Powder",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Suet",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Water",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sesame Seed Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Starch",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pasta",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Ginger",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Bean Sprouts",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Oyster Sauce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sugar",
+        "category": "Sweeteners"
+    },
+    {
+        "ingredient": "Soy Sauce",
+        "category": "Sauces and Condiments"
+    },
+    {
+        "ingredient": "Broccoli",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Milk",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Sunflower Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Parma Ham",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chorizo",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cumin",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "All spice",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Clove",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cinnamon",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Oregano",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chili Powder",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Balsamic Vinegar",
+        "category": "Sauces and Condiments"
+    },
+    {
+        "ingredient": "Tomato",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Tomato Ketchup",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Brown Sugar",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tofu",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Doubanjiang",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Scallions",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Spring Onions",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cornstarch",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Peanuts",
+        "category": "Nuts and Seeds"
+    },
+    {
+        "ingredient": "Coconut Milk",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Curry Paste",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lime",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tamarind Paste",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fish Sauce",
+        "category": "Sauces and Condiments"
+    },
+    {
+        "ingredient": "Rice",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Vegetable Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Worcestershire Sauce",
+        "category": "Sauces and Condiments"
+    },
+    {
+        "ingredient": "Shortcrust Pastry",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Spaghetti",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Parmesan",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Egg White",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lamb Kidney",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Brandy",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cream",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Dijon Mustard",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tabasco",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chives",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Green Pepper",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Wine",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Hotsauce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sausages",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Black Pudding",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Bread",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Chicken Stock",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Nutmeg",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Mustard Powder",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chicken",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Sweetcorn",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Squash",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pepper Flakes",
+        "category": "Others"
+    },
+    {
+        "ingredient": "White Wine",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sun-Dried Tomato",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Paprika",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Lemon",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Black Olives",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Ginger Cordial",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Coriander",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Enchilada Sauce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Monterey Jack Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tortillas",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chicken Breast",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Macaroni",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fajita Seasoning",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cheddar Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Ham",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Sea Salt",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cold Water",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Turmeric",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Green Chili Powder",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Yogurt",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Fenugreek",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Garam Masala",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chicken Thigh",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sake",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Potato starch",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Passata",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Gruyere",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Vinaigrette Dressing",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Taco Shells",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mexican Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Jalapeno",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Avocado",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Salsa",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sour Cream",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Duck Sauce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Honey",
+        "category": "Sweeteners"
+    },
+    {
+        "ingredient": "Rice Vinegar",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Gochujang",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Breadcrumbs",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Curry Powder",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Black Pepper",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Celery Salt",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sage",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Basil",
+        "category": "Spices and Herbs"
+    },
+    {
+        "ingredient": "Marjoram",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chestnuts",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mozzarella",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Green Olives",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tuna",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Peanut Butter",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Greek Yogurt",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Rice Stick Pasta",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Vinegar",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Peanut Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fried Vegetables",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Green Curry Paste",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Apples",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Blackberries",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Ice Cream",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Biscuits",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Almonds",
+        "category": "Nuts and Seeds"
+    },
+    {
+        "ingredient": "Almond Extract",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Raspberry Jam",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Banana",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Vanilla",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pecan Nuts",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Raspberries",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pink Food Colouring",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Apricot",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Marzipan",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Icing Sugar",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Hazlenuts",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lemon Juice",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mint",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Sultanas",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Bicarbonate Of Soda",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Walnuts",
+        "category": "Nuts and Seeds"
+    },
+    {
+        "ingredient": "Cream Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Yeast",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Dried Fruit",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Red Wine Jelly",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Creme Fraiche",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Maple Syrup",
+        "category": "Sweeteners"
+    },
+    {
+        "ingredient": "Chocolate Chips",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cacao",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chocolate",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cocoa",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Golden Syrup",
+        "category": "Sweeteners"
+    },
+    {
+        "ingredient": "Orange",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Oats",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Pudding",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Apricot Jam",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cherry",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Currants",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Peel",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Strawberries",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Meringue Nests",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Marshmallows",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Custard",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Blueberries",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Black Treacle",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Oatmeal",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Peaches",
+        "category": "Fruits"
+    },
+    {
+        "ingredient": "Peanut Cookies",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Gelatine Leafs",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Ricotta",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Peanut Brittle",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pears",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Star Anise",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pumpkin",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pretzels",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Caramel",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Popcorn",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Dates",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Redcurrants",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lamb",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Vegetable Stock",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cashews",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Khus khus",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cilantro",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Saffron",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Ghee",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Biryani masala",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Madras Paste",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lard",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Duck Legs",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Lentils",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tarragon",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Veal",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Fennel",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cayenne Pepper",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Goat Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Spinach",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Turkey",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Barbeque Sauce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Peas",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Prawns",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Lettuce",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fromage Frais",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fettuccine",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Colby Jack Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Lasagne Sheets",
+        "category": "Grains and Pasta"
+    },
+    {
+        "ingredient": "Pilchards",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Brussels Sprouts",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pork",
+        "category": "Meat"
+    },
+    {
+        "ingredient": "Horseradish",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Wonton Skin",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cajun",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fish",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fish Fillets",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Artichokes",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Dill",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Fish Stock",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Harissa",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mussels",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Feta",
+        "category": "Dairy"
+    },
+    {
+        "ingredient": "Salmon",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Sesame Seed",
+        "category": "Nuts and Seeds"
+    },
+    {
+        "ingredient": "Haddock",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Mackerel",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Chili",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Tamarind Ball",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Asparagus",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Vermicelli",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Monkfish",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Squid",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Capers",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Brie",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Prosciutto",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Blue Cheese",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Clams",
+        "category": "Fish and Seafood"
+    },
+    {
+        "ingredient": "Aubergine",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Courgettes",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Almond Milk",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Zucchini",
+        "category": "Vegetables"
+    },
+    {
+        "ingredient": "Vegan Butter",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Soy Milk",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chickpeas",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Toor dal",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mustard Seeds",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Paneer",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Naan Bread",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Truffle Oil",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Rocket",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Yellow Pepper",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Kale",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Wholegrain Bread",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Egg Plants",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Pine nuts",
+        "category": "Nuts and Seeds"
+    },
+    {
+        "ingredient": "Baguette",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Chili Flakes",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Italian Seasoning",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mascarpone",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Butternut Squash",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Roasted Vegetables",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Grain",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Cabbage",
+        "category": "Others"
+    },
+    {
+        "ingredient": "Mirin",
+        "category": "Others"
+    }
+]
