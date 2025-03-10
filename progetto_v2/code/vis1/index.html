@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>InfoVis Project</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 
     <style>
       body {
@@ -17,6 +18,7 @@
         max-width: 1200px;
         margin: 0 auto;
         padding: 2rem;
+        display: flex;
       }
 
       .header {
@@ -51,12 +53,225 @@
       .back-button:hover {
         background-color: #2980b9;
       }
+
+      svg {
+        background-color: #f5f5f5;
+        display: block;
+        margin: auto;
+      }  
     </style>
   </head>
 
   <body>
-    <a href="../index.html" class="back-button">← Back to Dashboard</a>
+    <header>
+      <h1>Visualizzazione 1</h1>
+    </header>
 
-    <div class="container"></div>
+    <footer>
+      <a href="../index.html" class="back-button">← Back to Dashboard</a>
+    </footer>
+
+    <div class="container">
+      <div id="map" style="height: 600px; width: 900px;"></div>
+      <div id="barchart"></div>
+    </div>
+
+    
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+
+    <script>
+      // Includere Leaflet.js nel progetto
+      // Assicurati di avere un elemento <div id="map"></div> nel tuo HTML
+
+      var map = L.map('map').setView([20, 0], 2);
+
+      // Aggiungere il layer di base
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+          attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(map);
+      
+      // Mappatura manuale tra i nomi dei paesi nei meals e quelli nel GeoJSON
+      const countryMapping = {
+          "American": "USA",
+          "British": "England",
+          "Chinese": "China",
+          "French": "France",
+          "Greek": "Greece",
+          "Indian": "India",
+          "Italian": "Italy",
+          "Japanese": "Japan",
+          "Mexican": "Mexico",
+          "Spanish": "Spain",
+          "Thai": "Thailand"
+      };
+
+      // Funzione per ottenere il nome corretto del paese
+      function getMappedCountry(mealCountry) {
+          return countryMapping[mealCountry] || mealCountry; // Se non mappato, restituisce il nome originale
+      }
+
+      // Creare un dizionario per contare i meals per paese
+      let mealsByCountry = {};
+      let mealsListByCountry = {};
+      let ingredientsByCountry = {};
+
+      // Caricare i dati GeoJSON delle nazioni e il dataset dei meals
+      Promise.all([
+          fetch('world.geojson').then(res => res.json()), 
+          fetch('../../data/meals.json').then(res => res.json()),
+          fetch('../../data/ingredients.json').then(res => res.json())
+      ]).then(([geoData, mealsData, ingredientsData]) => {
+          
+
+          Object.values(mealsData).forEach(meal => {
+              let country = getMappedCountry(meal.area.trim());
+              if (country) {
+                mealsByCountry[country] = (mealsByCountry[country] || 0) + 1;
+                if(ingredientsByCountry[country] == null){
+                  ingredientsByCountry[country] = {};
+                }
+              }
+              //mealsListByCountry[country].push(meal.name);
+
+              meal.ingredients.forEach(ingredient => {
+                ingredientsByCountry[country][ingredient] = (ingredientsByCountry[country][ingredient] || 0) + 1;
+                console.log(ingredientsByCountry[country][ingredient]);
+              });
+          });
+
+          console.log("Ingredienti per paese:", ingredientsByCountry);
+          
+          //console.log("Meals by Country:", mealsByCountry); // DEBUG
+
+          // Funzione per ottenere il colore in base al numero di meals
+          function getColor(d) {
+              return d > 50 ? '#800026' :
+                    d > 30 ? '#BD0026' :
+                    d > 20 ? '#E31A1C' :
+                    d > 10 ? '#FC4E2A' :
+                    d > 5  ? '#FD8D3C' :
+                    d > 1  ? '#FEB24C' : '#FFEDA0';
+          }
+          
+          function style(feature) {
+              return {
+                  fillColor: getColor(mealsByCountry[feature.properties.name] || 0),
+                  weight: 1,
+                  opacity: 1,
+                  color: 'white',
+                  fillOpacity: 0.7
+              };
+          }
+
+          function onEachFeature(feature, layer) {
+            let country = feature.properties.name; // Nome del paese nel GeoJSON
+            let mealCount = mealsByCountry[country] || 0; // Usa il count o 0 se non esiste
+            let mealsList = mealsListByCountry[country] || [];
+            
+            let popupContent = `<b>${country}</b><br>Meals count: ${mealCount}<br><ul>`;
+            
+            if (mealsList.length > 0) {
+                mealsList.forEach(meal => {
+                    popupContent += `<li>${meal}</li>`;
+                });
+            } 
+            popupContent += '</ul>';
+            
+            layer.bindPopup(popupContent);
+
+            // Aprire il bar chart al click
+            layer.on('click', function() {
+              updateBarChart(country);
+            });
+        }
+
+          
+          L.geoJson(geoData, {
+              style: style,
+              onEachFeature: onEachFeature
+          }).addTo(map);
+      });
+
+
+    function updateBarChart(country) {
+    console.log("Aggiornamento barchart per:", country); // Debug
+
+    // Estrai i primi 5 ingredienti più usati
+    let data = Object.entries(ingredientsByCountry[country] || {})
+                     .sort((a, b) => b[1] - a[1])  // Ordina per quantità
+                     .slice(0, 5); // Prendi i primi 5
+
+    console.log("Dati per il barchart:", data); // Debug
+
+    // Se non ci sono dati, esci
+    if (data.length === 0) return;
+
+    // Dimensioni del grafico
+    let width = 200, height = 150, margin = { top: 150, right: 30, bottom: 150, left: 100 };
+
+    // Pulire il contenuto precedente e creare l'SVG
+    let svg = d3.select("#barchart").html("")
+                .append("svg")
+                .attr("width", width + margin.left + margin.right)
+                .attr("height", height + margin.top + margin.bottom)
+                .append("g")
+                .attr("transform", `translate(${margin.left},${margin.top})`);
+
+    // Scale per gli assi
+    let x = d3.scaleBand()
+              .domain(data.map(d => d[0]))  // Ingredienti
+              .range([0, width])
+              .padding(0.3);
+
+    let y = d3.scaleLinear()
+              .domain([0, d3.max(data, d => d[1])]) // Quantità massima
+              .nice()
+              .range([height, 0]);
+
+    // Aggiungere assi X e Y
+    svg.append("g")
+       .attr("transform", `translate(0,${height})`)
+       .call(d3.axisBottom(x))
+       .selectAll("text")  // Ruota i nomi degli ingredienti per leggibilità
+       .attr("transform", "rotate(-45)")
+       .attr("text-anchor", "end")
+       .style("font-size", "12px");
+
+    svg.append("g")
+       .call(d3.axisLeft(y).ticks(6));
+
+    // Disegnare le barre
+    svg.selectAll("rect")
+       .data(data)
+       .enter()
+       .append("rect")
+       .attr("x", d => x(d[0]))
+       .attr("y", d => y(d[1]))
+       .attr("width", x.bandwidth())
+       .attr("height", d => height - y(d[1]))
+       .attr("fill", "steelblue");
+
+     /*  
+    // Aggiungere etichette sopra le barre
+    svg.selectAll(".bar-label")
+       .data(data)
+       .enter()
+       .append("text")
+       .attr("x", d => x(d[0]) + x.bandwidth() / 2)
+       .attr("y", d => y(d[1]) - 5)
+       .attr("text-anchor", "middle")
+       .attr("fill", "black")
+       .style("font-size", "12px")
+       .text(d => d[1]);
+       */
+}
+
+
+
+    </script>
+
   </body>
 </html>
