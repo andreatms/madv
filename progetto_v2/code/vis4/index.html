@@ -3,7 +3,8 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>InfoVis Project</title>
+        <title>Ingredient Treemap</title>
+        <script src="https://d3js.org/d3.v6.min.js"></script>
 
         <style>
             body {
@@ -17,6 +18,11 @@
                 max-width: 1200px;
                 margin: 0 auto;
                 padding: 2rem;
+                position: relative;
+                display: flex;
+                flex-direction: row;
+                align-items: flex-start;
+                gap: 20px;
             }
 
             .header {
@@ -34,74 +40,244 @@
                 font-size: 1.1rem;
             }
 
-            .visualization-grid {
-                display: grid;
-                grid-template-columns: repeat(4, 1fr); /* 4 colonne fisse */
-                gap: 2rem;
-                margin-top: 2rem;
-            }
-
-            .visualization-card {
-                background: white;
-                border-radius: 10px;
-                padding: 1.5rem;
-                text-align: center;
-                box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-                transition: transform 0.2s, box-shadow 0.2s;
-            }
-
-            .visualization-card:hover {
-                transform: translateY(-5px);
-                box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-            }
-
-            .visualization-card img {
-                width: 100%;
-                height: 200px;
-                object-fit: cover;
-                border-radius: 5px;
-                margin-bottom: 1rem;
-            }
-
-            .visualization-card h2 {
-                color: #2c3e50;
-                margin-bottom: 0.5rem;
-            }
-
-            .visualization-card p {
-                color: #7f8c8d;
-                margin-bottom: 1.5rem;
-            }
-
-            .view-button {
-                display: inline-block;
-                padding: 0.8rem 1.5rem;
-                background-color: #b98729;
+            .back-button {
+                position: absolute;
+                bottom: 25px;
+                left: 25px;
+                padding: 8px 15px;
+                background-color: #3498db;
                 color: white;
                 text-decoration: none;
                 border-radius: 5px;
+                font-size: 14px;
+                z-index: 1000;
                 transition: background-color 0.2s;
             }
 
-            .view-button:hover {
-                background-color: #b98729;
+            .back-button:hover {
+                background-color: #2980b9;
             }
 
-            /* Adattamento per schermi più piccoli */
-            @media (max-width: 1024px) {
-                .visualization-grid {
-                    grid-template-columns: repeat(2, 1fr); /* 2 colonne su tablet */
-                }
+            .tooltip {
+                position: absolute;
+                background: rgba(0, 0, 0, 0.8);
+                color: white;
+                padding: 8px;
+                border-radius: 5px;
+                font-size: 14px;
+                display: none;
+                pointer-events: none;
             }
 
-            @media (max-width: 600px) {
-                .visualization-grid {
-                    grid-template-columns: 1fr; /* 1 colonna su mobile */
-                }
+            .legend {
+                display: flex;
+                flex-direction: column;
+                align-items: flex-start;
+                border: 1px solid #ccc;
+                padding: 10px;
+                background: #f9f9f9;
+                border-radius: 5px;
+                max-width: 200px;
             }
+
+            .legend-item {
+                display: flex;
+                align-items: center;
+                margin-bottom: 5px;
+                cursor: pointer;
+            }
+
+            .legend-color {
+                width: 15px;
+                height: 15px;
+                margin-right: 8px;
+                border-radius: 3px;
+            }
+
+            svg {
+                background-color: #f5f5f5;
+                display: block;
+                margin: auto;
+            }
+
+            text {
+                font-size: 10px;
+                fill: black;
+                pointer-events: none;
+            }
+
+            .slider-container {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                margin-top: 10px;
+                justify-content: center;
+            }
+
+            .slider-container input {
+                width: 300px;
+            }
+
+            #treemap {
+                flex-grow: 1;
+            }
+
         </style>
     </head>
+
     <body>
+        <header>
+            <h1>Visualizzazione 4</h1>
+        </header>
+
+        <footer>
+            <a href="../index.html" class="back-button">← Back to Dashboard</a>
+        </footer>
+
+        <div class="container">
+            <div id="treemap"></div>
+            <div id="legend" class="legend"></div>
+        </div>
         
+        <div id="slider-container" class="slider-container">
+            <label for="occurrence-slider">Min Occurrences:</label>
+            <input type="range" id="occurrence-slider" min="1" max="10" value="1">
+            <span id="slider-value">1</span>
+        </div>
+
+        <div class="tooltip"></div>
+
+        <script>
+            const mealsFile = "../../data/meals_corrected.json";
+            const categoriesFile = "../../data/categorized_ingredients.json";
+            
+            Promise.all([
+                fetch(mealsFile).then(response => response.json()),
+                fetch(categoriesFile).then(response => response.json())
+            ])
+            .then(([mealsData, categoriesData]) => {
+                const ingredientCategories = {};
+                categoriesData.forEach(item => {
+                    ingredientCategories[item.ingredient] = item.category;
+                });
+
+                const ingredientCount = {};
+                Object.values(mealsData).forEach(meal => {
+                    if (meal.ingredients) {
+                        meal.ingredients.forEach(ingredient => {
+                            ingredientCount[ingredient] = (ingredientCount[ingredient] || 0) + 1;
+                        });
+                    }
+                });
+
+                const uniqueCategories = [...new Set(Object.values(ingredientCategories))];
+                const colorScale = d3.scaleOrdinal()
+                    .domain(uniqueCategories)
+                    .range(d3.schemeCategory10.concat(d3.schemeSet3));
+
+                const slider = d3.select("#occurrence-slider");
+                const sliderValue = d3.select("#slider-value");
+
+                slider.on("input", function() {
+                    const minOccurrences = +this.value;
+                    sliderValue.text(minOccurrences);
+                    updateTreemap(minOccurrences);
+                });
+
+                function updateTreemap(minOccurrences) {
+                    const filteredData = {
+                        name: "Ingredients",
+                        children: Object.entries(ingredientCount)
+                            .filter(([ingredient, count]) => count >= minOccurrences)
+                            .map(([ingredient, count]) => ({
+                                name: ingredient,
+                                value: count,
+                                category: ingredientCategories[ingredient] || "Unknown"
+                            }))
+                    };
+
+                    d3.select("#treemap").selectAll("*").remove();
+
+                    const width = 1000, height = 500;
+                    const svg = d3.select("#treemap")
+                        .append("svg")
+                        .attr("width", width)
+                        .attr("height", height);
+
+                    const root = d3.hierarchy(filteredData)
+                        .sum(d => d.value)
+                        .sort((a, b) => b.value - a.value);
+
+                    const treemap = d3.treemap()
+                        .size([width, height])
+                        .padding(2);
+
+                    treemap(root);
+
+                    const tooltip = d3.select(".tooltip");
+
+                    const cell = svg.selectAll("g")
+                        .data(root.leaves())
+                        .enter()
+                        .append("g")
+                        .attr("transform", d => `translate(${d.x0},${d.y0})`);
+
+                    const rects = cell.append("rect")
+                        .attr("width", d => d.x1 - d.x0)
+                        .attr("height", d => d.y1 - d.y0)
+                        .attr("fill", d => colorScale(d.data.category))
+                        .attr("stroke", "#fff")
+                        .attr("stroke-width", 1)
+                        .on("mouseover", (event, d) => {
+                            tooltip.style("display", "block")
+                                .html(`<strong>${d.data.name}</strong> (${d.data.category}): ${d.data.value} times`)
+                                .style("left", (event.pageX + 10) + "px")
+                                .style("top", (event.pageY - 10) + "px");
+                        })
+                        .on("mousemove", event => {
+                            tooltip.style("left", (event.pageX + 10) + "px")
+                                .style("top", (event.pageY - 10) + "px");
+                        })
+                        .on("mouseout", () => tooltip.style("display", "none"));
+
+                    cell.append("text")
+                        .attr("x", 5)
+                        .attr("y", 20)
+                        .text(d => d.data.name)
+                        .attr("font-size", "12px")
+                        .attr("fill", "white")
+                        .attr("font-weight", "bold")
+                        .attr("opacity", d => (d.x1 - d.x0 > 50 && d.y1 - d.y0 > 20) ? 1 : 0);
+
+                    d3.select("#legend").selectAll("*").remove();
+
+                    uniqueCategories.forEach(category => {
+                        const item = d3.select("#legend").append("div")
+                            .attr("class", "legend-item")
+                            .on("mouseover", () => {
+                                rects.transition().duration(200)
+                                    .attr("opacity", d => d.data.category === category ? 1 : 0.2);
+                            })
+                            .on("mouseout", () => {
+                                rects.transition().duration(200)
+                                    .attr("opacity", 1);
+                            });
+
+                        item.append("div")
+                            .attr("class", "legend-color")
+                            .style("background-color", colorScale(category));
+
+                        item.append("span").text(category);
+                    });
+                }
+
+                updateTreemap(+slider.property("value"));
+            })
+            .catch(error => console.error("Errore nel caricamento dei file:", error));
+        </script>
+
     </body>
 </html>
+
+
+
