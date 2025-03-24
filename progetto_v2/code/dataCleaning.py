@@ -1,11 +1,11 @@
 import json
 
 # Percorso del file originale e del file corretto
-meals_path = "data/meals.json"
-corrected_meals_path = "data/meals_corrected.json"
+meals_path = "progetto_v2/data/meals.json"
+corrected_meals_path = "progetto_v2/data/meals_corrected.json"
 
-ingredients_path = "data/ingredients.json"
-corrected_ingredients_path = "data/ingredients_corrected.json"
+ingredients_path = "progetto_v2/data/ingredients.json"
+corrected_ingredients_path = "progetto_v2/data/ingredients_corrected.json"
 
 # Caricamento dei dati
 with open(meals_path, "r", encoding="utf-8") as f:

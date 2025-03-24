@@ -686,10 +686,10 @@
           (obj) => obj.ingredient === ingredientId
         ).category;
 
-        //const cat = d3.select(`#category-${mealsData[ingredientId].category.replace(/\s+/g, "_")}`);
-        d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr(
-          "value",
-          parseInt(
+        // Controlla se il nodo ingrediente è già presente nel grafo
+        const isAlreadyInGraph = graphData.nodes.some(
+          (node) => node.id === ingredientId
+        );
             d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value")
           ) + 1
         );
