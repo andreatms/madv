@@ -60,7 +60,7 @@
         text-decoration: none;
         border-radius: 5px;
         font-size: 14px;
-        z-index: 1000;
+        z-index: 2000;
         transition: background-color 0.2s;
       }
 
@@ -102,6 +102,8 @@
         color: white;
         border-radius: 8px;
         z-index: 1000;
+        max-width: 70%;
+        margin-bottom: 300px; /* Aggiunto margine per evitare sovrapposizione */
       }
 
       #ranking-container {
@@ -114,6 +116,19 @@
         color: white;
         border-radius: 8px;
         z-index: 1000;
+      }
+
+      .tooltip {
+        position: absolute;
+        background: #2c3e50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        font-size: 14px;
+        line-height: 1.5;
       }
     </style>
   </head>
@@ -220,8 +235,6 @@
                 .style("border-radius", "4px")
                 .style("cursor", "pointer")
                 .on("click", function () {
-                  //addIngredientToGraph(obj.ingredient);
-
                   if (graphData.nodes.some((n) => n.id === obj.ingredient)) {
                     removeIngredientFromGraph(obj.ingredient);
                     d3.select(this).style("background", "#1abc9c"); // Cambia colore dopo la rimozione
@@ -235,48 +248,65 @@
                       ) - 1
                     );
                     d3.select(`#category-${el.replace(/\s+/g, "_")}`).text(
-                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).text().replace(/\(\d+\)/g, "") + 
-                      `${
+                      d3
+                        .select(`#category-${el.replace(/\s+/g, "_")}`)
+                        .text()
+                        .replace(/\(\d+\)/g, "") +
+                        `${
+                          parseInt(
+                            d3
+                              .select(`#category-${el.replace(/\s+/g, "_")}`)
+                              .attr("value")
+                          ) > 0
+                            ? " (" +
+                              d3
+                                .select(`#category-${el.replace(/\s+/g, "_")}`)
+                                .attr("value") +
+                              ")"
+                            : ""
+                        }`
+                    );
+                  } else {
+                    var selectedOnMenu =
+                      d3
+                        .selectAll(".ingredient-button")
+                        .filter(function () {
+                          return d3.select(this).text() === obj.ingredient;
+                        })
+                        .style("background") == "#e67e22";
+
+                    if (!selectedOnMenu) {
+                      addIngredientToGraph(obj.ingredient);
+                      d3.select(this).style("background", "#e67e22"); // Cambia colore dopo l'aggiunta
+
+                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).attr(
+                        "value",
                         parseInt(
                           d3
                             .select(`#category-${el.replace(/\s+/g, "_")}`)
                             .attr("value")
-                        ) > 0
-                          ? " (" +
-                            d3
-                              .select(`#category-${el.replace(/\s+/g, "_")}`)
-                              .attr("value") +
-                            ")"
-                          : ""
-                      }`
-                    );
-
-                  } else {
-                    addIngredientToGraph(obj.ingredient);
-                    d3.select(this).style("background", "#e67e22"); // Cambia colore dopo l'aggiunta
-
-                    d3.select(`#category-${el.replace(/\s+/g, "_")}`).attr(
-                      "value",
-                      parseInt(
+                        ) + 1
+                      );
+                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).text(
                         d3
                           .select(`#category-${el.replace(/\s+/g, "_")}`)
-                          .attr("value")
-                      ) + 1
-                    );
-                    d3.select(`#category-${el.replace(/\s+/g, "_")}`).text(
-                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).text().replace(/\(\d+\)/g, "") +
-                        " (" +
-                        d3
-                          .select(`#category-${el.replace(/\s+/g, "_")}`)
-                          .attr("value") +
-                        ")"
-                    );
+                          .text()
+                          .replace(/\(\d+\)/g, "") +
+                          " (" +
+                          d3
+                            .select(`#category-${el.replace(/\s+/g, "_")}`)
+                            .attr("value") +
+                          ")"
+                      );
+                    }
                   }
                 });
             }
           });
         });
       }
+
+      let categorizedIngredients;
 
       // Caricamento dei dati e creazione della sidebar e della classifica
       d3.json("../../data/categorized_ingredients.json")
@@ -286,6 +316,7 @@
             category: obj.category,
             ingredient: obj.ingredient,
           }));
+          categorizedIngredients = categorized_ingredients;
           createSideBar({ categories, categorized_ingredients });
           createRankingColumn(); // Crea la colonna per la classifica
         })
@@ -295,6 +326,7 @@
 
       let graphData = { nodes: [], links: [] };
       let svg, g, simulation;
+      let zoomBehavior;
 
       // Inizializzazione del grafo con zoom
       function initializeGraph() {
@@ -302,15 +334,7 @@
           .select(".container")
           .node()
           .getBoundingClientRect().width;
-        const sidebarWidth =
-          d3.select("#sidebar-container").node()?.getBoundingClientRect()
-            .width || 0;
-        const rankingWidth =
-          d3.select("#ranking-container").node()?.getBoundingClientRect()
-            .width || 0;
-
-        const svgWidth = containerWidth - sidebarWidth - rankingWidth - 20; // 20px per margini
-        const svgHeight = d3
+        const containerHeight = d3
           .select(".container")
           .node()
           .getBoundingClientRect().height;
@@ -318,14 +342,15 @@
         svg = d3
           .select(".container")
           .append("svg")
-          .attr("width", svgWidth)
-          .attr("height", svgHeight)
-          .call(
-            d3.zoom().on("zoom", (event) => {
-              g.attr("transform", event.transform);
-            })
-          )
-          .append("g");
+          .attr("width", containerWidth)
+          .attr("height", containerHeight);
+
+        // Configura il comportamento dello zoom e salvalo
+        zoomBehavior = d3.zoom().on("zoom", (event) => {
+          g.attr("transform", event.transform);
+        });
+
+        svg.call(zoomBehavior);
 
         g = svg.append("g");
 
@@ -339,7 +364,10 @@
               .distance(100)
           )
           .force("charge", d3.forceManyBody().strength(-200))
-          .force("center", d3.forceCenter(svgWidth / 2, svgHeight / 2));
+          .force(
+            "center",
+            d3.forceCenter(containerWidth / 2, containerHeight / 2)
+          );
       }
 
       // Funzione per aggiornare la visibilità e il raggio dei nodi pasto
@@ -386,49 +414,119 @@
           .append("div")
           .attr("id", "ranking-container")
           .style("display", "none"); // Nascondi inizialmente
-
-        rankingColumn
-          .append("h3")
-          .text("Top 5 Meals")
-          .style("text-align", "center");
-
-        // Aggiungi un elemento vuoto iniziale
-        rankingColumn.append("ul").attr("id", "ranking-list");
       }
 
       // Funzione per aggiornare la classifica dei piatti
       function updateRanking() {
-        // Conta il numero di ingredienti per ciascun piatto
-        const mealCounts = {};
+        // Ottieni gli ingredienti selezionati
+        const selectedIngredients = graphData.nodes
+          .filter((node) => node.type === "ingredient")
+          .map((node) => node.id);
 
-        graphData.links.forEach((link) => {
-          if (link.target.type === "meal") {
-            const mealId = link.target.id;
-            mealCounts[mealId] = (mealCounts[mealId] || 0) + 1;
+        // Controlla se non ci sono ingredienti selezionati
+        if (selectedIngredients.length === 0) {
+          // Nascondi il menu dei piatti
+          d3.select("#ranking-container").style("display", "none");
+          return; // Esci dalla funzione
+        }
+
+        // Filtra i piatti che contengono tutti gli ingredienti selezionati
+        const exactMatches = Object.entries(mealsData).filter(
+          ([meal, details]) => {
+            const mealIngredients = details.ingredients;
+
+            // Controlla se tutti gli ingredienti selezionati sono inclusi negli ingredienti del piatto
+            return selectedIngredients.every((ingredient) =>
+              mealIngredients.includes(ingredient)
+            );
           }
+        );
+
+        // Ottieni i nomi dei piatti con esatta corrispondenza
+        const exactMatchMeals = exactMatches.map(([meal]) => meal);
+
+        // Filtra i piatti che contengono almeno 2 degli ingredienti selezionati,
+        // escludendo quelli già presenti nella prima sezione
+        const partialMatches = Object.entries(mealsData)
+          .map(([meal, details]) => {
+            const mealIngredients = details.ingredients;
+            const matchingIngredients = selectedIngredients.filter(
+              (ingredient) => mealIngredients.includes(ingredient)
+            );
+
+            return {
+              meal,
+              matchingIngredients,
+              totalIngredients: mealIngredients.length,
+            };
+          })
+          .filter(
+            (entry) =>
+              entry.matchingIngredients.length >= 2 &&
+              !exactMatchMeals.includes(entry.meal) // Escludi i piatti della prima sezione
+          )
+          .sort(
+            (a, b) =>
+              b.matchingIngredients.length - a.matchingIngredients.length
+          ); // Ordina per numero di ingredienti corrispondenti
+
+        // Aggiorna la lista dei piatti con esatta corrispondenza
+        const rankingContainer = d3.select("#ranking-container");
+        rankingContainer.selectAll("*").remove(); // Rimuovi contenuto precedente
+
+        const allRankingContainer = rankingContainer
+          .append("div")
+          .attr("id", "all-ranking-container");
+        allRankingContainer
+          .append("h3")
+          .text("Meals with all selected ingredients")
+          .style("text-align", "center");
+
+        const rankingList = allRankingContainer
+          .append("ul")
+          .attr("id", "ranking-list");
+
+        exactMatches.forEach(([meal]) => {
+          rankingList.append("li").text(`${meal}`).style("color", "#1abc9c");
         });
 
-        // Ordina i piatti in base al numero di ingredienti selezionati
-        const sortedMeals = Object.entries(mealCounts)
-          .sort((a, b) => b[1] - a[1]) // Ordina in ordine decrescente
-          .slice(0, 5); // Prendi i primi 5 piatti
-
-        const rankingList = d3.select("#ranking-list");
-        rankingList.selectAll("*").remove(); // Rimuovi gli elementi precedenti
-
-        // Aggiungi i piatti alla classifica
-        sortedMeals.forEach(([meal, count]) => {
-          rankingList
-            .append("li")
-            .text(`${meal} (${count} ingredients)`)
-            .style("color", "#1abc9c");
-        });
-
-        // Mostra o nascondi la classifica in base alla presenza di nodi "meal"
-        if (sortedMeals.length > 0) {
+        // Mostra o nascondi la classifica in base alla presenza di piatti
+        if (exactMatches.length > 0 || partialMatches.length > 0) {
           d3.select("#ranking-container").style("display", "block");
         } else {
           d3.select("#ranking-container").style("display", "none");
+        }
+
+        if (exactMatches.length > 0) {
+          d3.select("#all-ranking-container").style("display", "block");
+        } else {
+          d3.select("#all-ranking-container").style("display", "none");
+        }
+
+        // Aggiungi una nuova sezione per i piatti con almeno 2 ingredienti corrispondenti
+        if (partialMatches.length > 0) {
+          const partialRankingContainer = rankingContainer
+            .append("div")
+            .attr("id", "partial-ranking-container")
+            .style("margin-top", "20px");
+
+          partialRankingContainer
+            .append("h4")
+            .text("Meals with at least 2 matching ingredients")
+            .style("text-align", "center");
+
+          const partialRankingList = partialRankingContainer.append("ul");
+
+          partialMatches.forEach((entry) => {
+            partialRankingList
+              .append("li")
+              .text(
+                `${entry.meal} (${entry.matchingIngredients.length} matching ingredients out of ${entry.totalIngredients})`
+              )
+              .style("color", "#f39c12");
+          });
+        } else {
+          d3.select("#partial-ranking-container").remove();
         }
       }
 
@@ -461,6 +559,7 @@
           .enter()
           .append("circle")
           .attr("class", "node")
+          .attr("id", (d) => `node-${d.id.replace(/\s+/g, "_")}`) // Aggiungi un id basato sul nome del nodo
           .call(
             d3
               .drag()
@@ -468,11 +567,30 @@
               .on("drag", dragged)
               .on("end", dragEnded)
           )
+          .on("mouseover", function (event, d) {
+            tooltip
+              .style("opacity", 1)
+              .html(
+                `<strong>${d.type.toUpperCase()}</strong><br>${d.id}` // Mostra il tipo in grassetto e il nome del nodo
+              )
+              .style("left", `${event.pageX + 10}px`)
+              .style("top", `${event.pageY + 10}px`);
+          })
+          .on("mousemove", function (event) {
+            tooltip
+              .style("left", `${event.pageX + 10}px`)
+              .style("top", `${event.pageY + 10}px`);
+          })
+          .on("mouseout", function () {
+            tooltip.style("opacity", 0);
+          })
           .on("click", function (event, d) {
             if (d.type === "meal") {
-              addRelatedIngredientsToGraph(d.id);
+              // Disabilitata la funzionalità di aggiunta degli ingredienti correlati
+              // addRelatedIngredientsToGraph(d.id);
             } else if (d.type === "ingredient") {
-              addRelatedMealsToGraph(d.id);
+              // Disabilitata la funzionalità di aggiunta dei pasti correlati
+              // addRelatedMealsToGraph(d.id);
             }
           });
 
@@ -505,10 +623,27 @@
         updateRanking(); // Aggiorna la classifica dei piatti
       }
 
+      // Aggiungi un div per il tooltip
+      const tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("background", "#2c3e50")
+        .style("color", "white")
+        .style("padding", "5px 10px")
+        .style("border-radius", "5px")
+        .style("pointer-events", "none")
+        .style("opacity", 0);
+
       // Funzione per aggiungere un ingrediente al grafo
       function addIngredientToGraph(selectedIngredient) {
         if (!graphData.nodes.find((n) => n.id === selectedIngredient)) {
-          graphData.nodes.push({ id: selectedIngredient, type: "ingredient" });
+          graphData.nodes.push({
+            id: selectedIngredient,
+            type: "ingredient",
+            level: "selected",
+          });
         }
 
         const relatedMeals = Object.entries(mealsData).filter(
@@ -517,7 +652,7 @@
 
         relatedMeals.forEach(([meal]) => {
           if (!graphData.nodes.find((n) => n.id === meal)) {
-            graphData.nodes.push({ id: meal, type: "meal" });
+            graphData.nodes.push({ id: meal, type: "meal", level: "related" });
           }
 
           if (
@@ -568,9 +703,15 @@
       function addRelatedIngredientsToGraph(mealId) {
         const relatedIngredients = mealsData[mealId].ingredients;
 
+        graphData.nodes.find((n) => n.id === mealId).level = "selected";
+
         relatedIngredients.forEach((ingredient) => {
           if (!graphData.nodes.find((n) => n.id === ingredient)) {
-            graphData.nodes.push({ id: ingredient, type: "ingredient" });
+            graphData.nodes.push({
+              id: ingredient,
+              type: "ingredient",
+              level: "related",
+            });
           }
 
           if (
@@ -585,6 +726,22 @@
         updateGraph();
       }
 
+      /*
+      function updateNodeStyle(nodes, type) {
+        if (type == "related") {
+          nodes.forEach((node) => {
+            // Seleziona il nodo circle con l'id specificato
+            const circle = d3.select(`#node-${node.id.replace(/\s+/g, "_")}`);
+
+            // Controlla se il nodo esiste
+            if (!circle.empty()) {
+              circle.style("fill", "blue"); // Cambia colore a arancione
+            }
+          });
+        }
+      }
+      */
+
       function addRelatedMealsToGraph(ingredientId) {
         const relatedMeals = Object.entries(mealsData).filter(
           ([meal, details]) => details.ingredients.includes(ingredientId)
@@ -592,7 +749,7 @@
 
         relatedMeals.forEach(([meal]) => {
           if (!graphData.nodes.find((n) => n.id === meal)) {
-            graphData.nodes.push({ id: meal, type: "meal" });
+            graphData.nodes.push({ id: meal, type: "meal", level: "related" });
           }
 
           if (
@@ -604,6 +761,14 @@
           }
         });
 
+        var selectedOnMenu =
+          d3
+            .selectAll(".ingredient-button")
+            .filter(function () {
+              return d3.select(this).text() === ingredientId;
+            })
+            .style("background") === "rgb(230, 126, 34)";
+
         // Cambia il colore del pulsante corrispondente nel menu
         d3.selectAll(".ingredient-button")
           .filter(function () {
@@ -611,11 +776,44 @@
           })
           .style("background", "#e67e22"); // Cambia colore a arancione
 
+        const cat = categorizedIngredients.find(
+          (obj) => obj.ingredient === ingredientId
+        ).category;
+
+        // Controlla se il nodo ingrediente è già presente nel grafo
+        const isAlreadyInGraph = graphData.nodes.some(
+          (node) => node.id === ingredientId
+        );
+
+        if (!selectedOnMenu) {
+          d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr(
+            "value",
+            parseInt(
+              d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value")
+            ) + 1
+          );
+          d3.select(`#category-${cat.replace(/\s+/g, "_")}`).text(
+            d3
+              .select(`#category-${cat.replace(/\s+/g, "_")}`)
+              .text()
+              .replace(/\(\d+\)/g, "") +
+              " (" +
+              d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value") +
+              ")"
+          );
+        }
+
         updateGraph();
       }
 
       // Funzione di auto-zoom per mantenere il grafo visibile
       function autoZoom() {
+        // Controlla se ci sono nodi nel grafo
+        if (graphData.nodes.length === 0) {
+          //console.warn("Nessun nodo presente nel grafo. Autozoom non eseguito.");
+          return; // Esci dalla funzione
+        }
+
         // Calcola i limiti del grafo
         const bounds = {
           minX: Infinity,
@@ -635,9 +833,25 @@
         const graphWidth = bounds.maxX - bounds.minX;
         const graphHeight = bounds.maxY - bounds.minY;
 
+        // Controlla se il grafo ha dimensioni valide
+        if (graphWidth === 0 || graphHeight === 0) {
+          console.warn(
+            "Dimensioni del grafo non valide. Autozoom non eseguito."
+          );
+          return; // Esci dalla funzione
+        }
+
         // Ottieni le dimensioni dell'SVG
-        const svgWidth = svg.node().getBoundingClientRect().width;
-        const svgHeight = svg.node().getBoundingClientRect().height;
+        const sidebarWidth =
+          d3.select("#sidebar-container").node()?.getBoundingClientRect()
+            .width || 0;
+        const rankingWidth =
+          d3.select("#ranking-container").node()?.getBoundingClientRect()
+            .width || 0;
+
+        const svgWidth =
+          d3.select("svg").attr("width") - sidebarWidth - rankingWidth;
+        const svgHeight = d3.select("svg").attr("height");
 
         // Calcola il fattore di scala per adattare il grafo all'SVG
         const scaleFactor =
@@ -653,10 +867,12 @@
         // Applica la trasformazione con zoom e traslazione
         svg
           .transition()
-          .duration(500)
+          .duration(100)
           .call(
-            d3.zoom().transform,
-            d3.zoomIdentity.translate(translateX, translateY).scale(scaleFactor)
+            zoomBehavior.transform,
+            d3.zoomIdentity
+              .translate(translateX + sidebarWidth, translateY)
+              .scale(scaleFactor)
           );
       }
 

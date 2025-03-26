@@ -117,6 +117,25 @@
         border-radius: 8px;
         z-index: 1000;
       }
+
+      .tooltip {
+        position: absolute;
+        background: #2c3e50;
+        color: white;
+        padding: 5px 10px;
+        border-radius: 5px;
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s;
+        font-size: 14px;
+        line-height: 1.5;
+      }
+
+      /* Aumenta l'interlinea per gli elementi della ranking list */
+      #ranking-container ul li {
+        line-height: 1.3; /* Modifica il valore per regolare l'interlinea */
+        margin-bottom: 15px; /* Aggiungi uno spazio extra tra gli elementi */
+      }
     </style>
   </head>
 
@@ -222,8 +241,6 @@
                 .style("border-radius", "4px")
                 .style("cursor", "pointer")
                 .on("click", function () {
-                  //addIngredientToGraph(obj.ingredient);
-
                   if (graphData.nodes.some((n) => n.id === obj.ingredient)) {
                     removeIngredientFromGraph(obj.ingredient);
                     d3.select(this).style("background", "#1abc9c"); // Cambia colore dopo la rimozione
@@ -256,28 +273,38 @@
                         }`
                     );
                   } else {
-                    addIngredientToGraph(obj.ingredient);
-                    d3.select(this).style("background", "#e67e22"); // Cambia colore dopo l'aggiunta
-
-                    d3.select(`#category-${el.replace(/\s+/g, "_")}`).attr(
-                      "value",
-                      parseInt(
-                        d3
-                          .select(`#category-${el.replace(/\s+/g, "_")}`)
-                          .attr("value")
-                      ) + 1
-                    );
-                    d3.select(`#category-${el.replace(/\s+/g, "_")}`).text(
+                    var selectedOnMenu =
                       d3
-                        .select(`#category-${el.replace(/\s+/g, "_")}`)
-                        .text()
-                        .replace(/\(\d+\)/g, "") +
-                        " (" +
+                        .selectAll(".ingredient-button")
+                        .filter(function () {
+                          return d3.select(this).text() === obj.ingredient;
+                        })
+                        .style("background") == "#e67e22";
+
+                    if (!selectedOnMenu) {
+                      addIngredientToGraph(obj.ingredient);
+                      d3.select(this).style("background", "#e67e22"); // Cambia colore dopo l'aggiunta
+
+                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).attr(
+                        "value",
+                        parseInt(
+                          d3
+                            .select(`#category-${el.replace(/\s+/g, "_")}`)
+                            .attr("value")
+                        ) + 1
+                      );
+                      d3.select(`#category-${el.replace(/\s+/g, "_")}`).text(
                         d3
                           .select(`#category-${el.replace(/\s+/g, "_")}`)
-                          .attr("value") +
-                        ")"
-                    );
+                          .text()
+                          .replace(/\(\d+\)/g, "") +
+                          " (" +
+                          d3
+                            .select(`#category-${el.replace(/\s+/g, "_")}`)
+                            .attr("value") +
+                          ")"
+                      );
+                    }
                   }
                 });
             }
@@ -436,7 +463,9 @@
             return {
               meal,
               matchingIngredients,
+              totalIngredientsList: mealIngredients, // Aggiungi la lista completa degli ingredienti
               totalIngredients: mealIngredients.length,
+              matchingPercentage: matchingIngredients.length / mealIngredients.length,
             };
           })
           .filter(
@@ -444,10 +473,14 @@
               entry.matchingIngredients.length >= 2 &&
               !exactMatchMeals.includes(entry.meal) // Escludi i piatti della prima sezione
           )
-          .sort(
-            (a, b) =>
-              b.matchingIngredients.length - a.matchingIngredients.length
-          ); // Ordina per numero di ingredienti corrispondenti
+          .sort((a, b) => {
+            // Ordina prima per numero assoluto di ingredienti corrispondenti (decrescente)
+            if (b.matchingIngredients.length !== a.matchingIngredients.length) {
+              return b.matchingIngredients.length - a.matchingIngredients.length;
+            }
+            // Come secondo criterio, ordina per percentuale di ingredienti corrispondenti (decrescente)
+            return b.matchingPercentage - a.matchingPercentage;
+          });
 
         // Aggiorna la lista dei piatti con esatta corrispondenza
         const rankingContainer = d3.select("#ranking-container");
@@ -465,15 +498,52 @@
           .append("ul")
           .attr("id", "ranking-list");
 
-        exactMatches.forEach(([meal]) => {
-          rankingList.append("li").text(`${meal}`).style("color", "#1abc9c");
+        // Rimuovi gli eventi `mouseover` e `mouseout` per i nodi della classifica
+        exactMatches.forEach(([meal, details]) => {
+          rankingList
+            .append("li")
+            .html(`<strong>${meal}</strong>`)
+            .style("color", "#f39c12")
+            .style("margin-bottom", "5px")
+            .on("mouseover", function (event) {
+              const ingredients = details.ingredients
+                .map((ingredient) =>
+                  selectedIngredients.includes(ingredient)
+                    ? `<span style="color: #f39c12;">${ingredient}</span>`
+                    : `<span style="font-style: italic">${ingredient}</span>`
+                )
+                .join(", ");
+
+              tooltip
+                .style("opacity", 1)
+                .html(
+                  `<strong>${meal}</strong><br>Ingredients: ${ingredients}`
+                )
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY + 10}px`)
+                .style("z-index", 2000);
+            })
+            .on("mousemove", function (event) {
+              tooltip
+                .style("left", `${event.pageX + 10}px`)
+                .style("top", `${event.pageY + 10}px`);
+            })
+            .on("mouseout", function () {
+              tooltip.style("opacity", 0);
+            });
         });
 
         // Mostra o nascondi la classifica in base alla presenza di piatti
-        if (exactMatches.length > 0) {
+        if (exactMatches.length > 0 || partialMatches.length > 0) {
           d3.select("#ranking-container").style("display", "block");
         } else {
           d3.select("#ranking-container").style("display", "none");
+        }
+
+        if (exactMatches.length > 0) {
+          d3.select("#all-ranking-container").style("display", "block");
+        } else {
+          d3.select("#all-ranking-container").style("display", "none");
         }
 
         // Aggiungi una nuova sezione per i piatti con almeno 2 ingredienti corrispondenti
@@ -493,12 +563,38 @@
           partialMatches.forEach((entry) => {
             partialRankingList
               .append("li")
-              .text(
-                `${entry.meal} (${entry.matchingIngredients.length} matching ingredients out of ${entry.totalIngredients})`
+              .html(
+                `<strong>${entry.meal}</strong> <br><span style="color: white; font-size: 13px">(Matching Ingredients: ${entry.matchingIngredients.length} / ${entry.totalIngredients})</span>`
               )
-              .style("color", "#f39c12");
+              .style("color", "#1abc9c")
+              .on("mouseover", function (event) {
+                const ingredients = entry.totalIngredientsList
+                  .map((ingredient) =>
+                    entry.matchingIngredients.includes(ingredient)
+                      ? `<span style="color: #1abc9c; font-style: italic">${ingredient}</span>`
+                      : `<span style="font-style: italic">${ingredient}</span>`
+                  )
+                  .join(", ");
+
+                tooltip
+                  .style("opacity", 1)
+                  .html(
+                    `<strong>${entry.meal}</strong><br>Ingredients: ${ingredients}`
+                  )
+                  .style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY + 10}px`)
+                  .style("z-index", 2000);
+              })
+              .on("mousemove", function (event) {
+                tooltip
+                  .style("left", `${event.pageX + 10}px`)
+                  .style("top", `${event.pageY + 10}px`);
+              })
+              .on("mouseout", function () {
+                tooltip.style("opacity", 0);
+              });
           });
-        } else  {
+        } else {
           d3.select("#partial-ranking-container").remove();
         }
       }
@@ -532,6 +628,11 @@
           .enter()
           .append("circle")
           .attr("class", "node")
+          .attr("id", (d) => `node-${d.id.replace(/\s+/g, "_")}`) // Aggiungi un id basato sul nome del nodo
+          .attr("fill", (d) => {
+            d.originalColor = d.type === "ingredient" ? "#1abc9c" : "#e74c3c"; // Colore originale
+            return d.originalColor;
+          })
           .call(
             d3
               .drag()
@@ -539,12 +640,23 @@
               .on("drag", dragged)
               .on("end", dragEnded)
           )
-          .on("click", function (event, d) {
-            if (d.type === "meal") {
-              addRelatedIngredientsToGraph(d.id);
-            } else if (d.type === "ingredient") {
-              addRelatedMealsToGraph(d.id);
-            }
+          .on("mouseover", function (event, d) {
+            tooltip
+              .style("opacity", 1)
+              .html(
+                `<strong>${d.type === "meal" ? "Meal" : "Ingredient"}</strong><br> ${d.id}`
+              )
+              .style("left", `${event.pageX + 10}px`)
+              .style("top", `${event.pageY + 10}px`)
+              .style("z-index", 2000);
+          })
+          .on("mousemove", function (event) {
+            tooltip
+              .style("left", `${event.pageX + 10}px`)
+              .style("top", `${event.pageY + 10}px`);
+          })
+          .on("mouseout", function () {
+            tooltip.style("opacity", 0);
           });
 
         // Aggiungi tooltip ai nuovi nodi
@@ -576,10 +688,27 @@
         updateRanking(); // Aggiorna la classifica dei piatti
       }
 
+      // Aggiungi un div per il tooltip
+      const tooltip = d3
+        .select("body")
+        .append("div")
+        .attr("class", "tooltip")
+        .style("position", "absolute")
+        .style("background", "#2c3e50")
+        .style("color", "white")
+        .style("padding", "5px 10px")
+        .style("border-radius", "5px")
+        .style("pointer-events", "none")
+        .style("opacity", 0);
+
       // Funzione per aggiungere un ingrediente al grafo
       function addIngredientToGraph(selectedIngredient) {
         if (!graphData.nodes.find((n) => n.id === selectedIngredient)) {
-          graphData.nodes.push({ id: selectedIngredient, type: "ingredient" });
+          graphData.nodes.push({
+            id: selectedIngredient,
+            type: "ingredient",
+            level: "selected",
+          });
         }
 
         const relatedMeals = Object.entries(mealsData).filter(
@@ -588,7 +717,7 @@
 
         relatedMeals.forEach(([meal]) => {
           if (!graphData.nodes.find((n) => n.id === meal)) {
-            graphData.nodes.push({ id: meal, type: "meal" });
+            graphData.nodes.push({ id: meal, type: "meal", level: "related" });
           }
 
           if (
@@ -639,9 +768,15 @@
       function addRelatedIngredientsToGraph(mealId) {
         const relatedIngredients = mealsData[mealId].ingredients;
 
+        graphData.nodes.find((n) => n.id === mealId).level = "selected";
+
         relatedIngredients.forEach((ingredient) => {
           if (!graphData.nodes.find((n) => n.id === ingredient)) {
-            graphData.nodes.push({ id: ingredient, type: "ingredient" });
+            graphData.nodes.push({
+              id: ingredient,
+              type: "ingredient",
+              level: "related",
+            });
           }
 
           if (
@@ -656,6 +791,22 @@
         updateGraph();
       }
 
+      /*
+      function updateNodeStyle(nodes, type) {
+        if (type == "related") {
+          nodes.forEach((node) => {
+            // Seleziona il nodo circle con l'id specificato
+            const circle = d3.select(`#node-${node.id.replace(/\s+/g, "_")}`);
+
+            // Controlla se il nodo esiste
+            if (!circle.empty()) {
+              circle.style("fill", "blue"); // Cambia colore a arancione
+            }
+          });
+        }
+      }
+      */
+
       function addRelatedMealsToGraph(ingredientId) {
         const relatedMeals = Object.entries(mealsData).filter(
           ([meal, details]) => details.ingredients.includes(ingredientId)
@@ -663,7 +814,7 @@
 
         relatedMeals.forEach(([meal]) => {
           if (!graphData.nodes.find((n) => n.id === meal)) {
-            graphData.nodes.push({ id: meal, type: "meal" });
+            graphData.nodes.push({ id: meal, type: "meal", level: "related" });
           }
 
           if (
@@ -674,6 +825,14 @@
             graphData.links.push({ source: ingredientId, target: meal });
           }
         });
+
+        var selectedOnMenu =
+          d3
+            .selectAll(".ingredient-button")
+            .filter(function () {
+              return d3.select(this).text() === ingredientId;
+            })
+            .style("background") === "rgb(230, 126, 34)";
 
         // Cambia il colore del pulsante corrispondente nel menu
         d3.selectAll(".ingredient-button")
@@ -690,18 +849,24 @@
         const isAlreadyInGraph = graphData.nodes.some(
           (node) => node.id === ingredientId
         );
-            d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value")
-          ) + 1
-        );
-        d3.select(`#category-${cat.replace(/\s+/g, "_")}`).text(
-          d3
-            .select(`#category-${cat.replace(/\s+/g, "_")}`)
-            .text()
-            .replace(/\(\d+\)/g, "") +
-            " (" +
-            d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value") +
-            ")"
-        );
+
+        if (!selectedOnMenu) {
+          d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr(
+            "value",
+            parseInt(
+              d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value")
+            ) + 1
+          );
+          d3.select(`#category-${cat.replace(/\s+/g, "_")}`).text(
+            d3
+              .select(`#category-${cat.replace(/\s+/g, "_")}`)
+              .text()
+              .replace(/\(\d+\)/g, "") +
+              " (" +
+              d3.select(`#category-${cat.replace(/\s+/g, "_")}`).attr("value") +
+              ")"
+          );
+        }
 
         updateGraph();
       }
@@ -735,7 +900,9 @@
 
         // Controlla se il grafo ha dimensioni valide
         if (graphWidth === 0 || graphHeight === 0) {
-          console.warn("Dimensioni del grafo non valide. Autozoom non eseguito.");
+          console.warn(
+            "Dimensioni del grafo non valide. Autozoom non eseguito."
+          );
           return; // Esci dalla funzione
         }
 
@@ -759,7 +926,8 @@
         const translateX =
           (svgWidth - graphWidth * scaleFactor) / 2 - bounds.minX * scaleFactor;
         const translateY =
-          (svgHeight - graphHeight * scaleFactor) / 2 - bounds.minY * scaleFactor;
+          (svgHeight - graphHeight * scaleFactor) / 2 -
+          bounds.minY * scaleFactor;
 
         // Applica la trasformazione con zoom e traslazione
         svg
