@@ -17,7 +17,6 @@
 
       .container {
         display: flex;
-        justify-content: center;
         align-items: center;
         max-width: 1300px;
         margin: 0 auto;
@@ -65,16 +64,10 @@
       }
 
       .zoom-buttons {
-        /*
-        position: absolute;
-        bottom: 250px;
-        left: 25px;
-        display: flex;
-        flex-direction: column;
-        */
         flex: 0 1 120px; /* Dimensione fissa per i bottoni */
         display: flex;
         flex-direction: column;
+        margin-left: -80px;
       }
 
       .zoom-buttons button {
@@ -93,17 +86,13 @@
       }
 
       #map {
-        /*flex: 1;*/
-        flex: 1 1 600px;
+        width: 900px;
         height: 600px;
         background-color: #e0e0e0;
       }
 
       #barchart {
-        flex: 0 1 200px; /* Dimensione fissa per il barchart */
-        margin-left: 50; /* Rimuove il margine sinistro */
-        /*width: 200px;
-        margin-left: 20px;*/
+        flex: 0 1 200px;
       }
       
       .hidden {
@@ -245,6 +234,71 @@
         onEachFeature: onEachFeature
       }).addTo(map);
 
+      // Aggiungi una legenda con gradiente lineare
+      const legendSvg = d3.select("#map").append("svg")
+        .attr("id", "legend")
+        .attr("width", 200)
+        .attr("height", 60)
+        .style("position", "absolute")
+        .style("bottom", "20px")
+        .style("left", "20px")
+        .style("z-index", "1000"); // Assicurati che sia sopra la mappa
+
+      // Definisci il gradiente lineare
+      const gradient = legendSvg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
+
+      // Aggiungi i colori al gradiente
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#DCDCDC"); // Colore iniziale
+
+      gradient.append("stop")
+        .attr("offset", "20%")
+        .attr("stop-color", "#FEB24C");
+
+      gradient.append("stop")
+        .attr("offset", "40%")
+        .attr("stop-color", "#FD8D3C");
+
+      gradient.append("stop")
+        .attr("offset", "60%")
+        .attr("stop-color", "#FC4E2A");
+
+      gradient.append("stop")
+        .attr("offset", "80%")
+        .attr("stop-color", "#E31A1C");
+
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#800026"); // Colore finale
+
+      // Disegna il rettangolo con il gradiente
+      legendSvg.append("rect")
+        .attr("x", 10)
+        .attr("y", 10)
+        .attr("width", 180)
+        .attr("height", 20)
+        .style("fill", "url(#gradient)");
+
+      // Aggiungi l'asse con i valori
+      const scale = d3.scaleLinear()
+        .domain([0, 50]) // Cambia il massimo in base ai tuoi dati
+        .range([10, 190]);
+
+      const axis = d3.axisBottom(scale)
+        .ticks(6)
+        .tickFormat(d => d === 50 ? `> ${d}` : d); // Mostra "> 50" per il valore massimo
+
+      legendSvg.append("g")
+        .attr("transform", "translate(0, 35)")
+        .call(axis);
+
       });
 
       function updateBarChart(country) {
@@ -263,7 +317,7 @@
 
         chartContainer.classed("hidden", false);
 
-        let width = 170, height = 150, margin = { top: 20, right: 0, bottom: 100, left: 30 };
+        let width = 170, height = 150, margin = { top: 80, right: 40, bottom: 100, left: 50 };
 
         let svg = chartContainer.html("")
           .append("svg")
@@ -271,6 +325,15 @@
           .attr("height", height + margin.top + margin.bottom)
           .append("g")
           .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Aggiungi un titolo al bar chart
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", -50) // Posiziona il titolo sopra il grafico
+          .attr("text-anchor", "middle")
+          .style("font-size", "16px")
+          .style("font-weight", "bold")
+          .text(`Top 5 Ingredients in ${country}`);
 
         let localMaxIngredientCount = d3.max(data, d => d[1]) || 1; // Evita problemi se vuoto
 
@@ -292,9 +355,26 @@
           .attr("text-anchor", "end")
           .style("font-size", "12px");
 
+        // Aggiungi etichetta per l'asse x
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + margin.bottom - 10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("Ingredients");
+
         svg.append("g")
-          //.call(d3.axisLeft(y));
-          .call(d3.axisLeft(y).ticks(6));
+          .call(d3.axisLeft(y).ticks(6) // Numero massimo di tick
+            .tickFormat(d => Number.isInteger(d) ? d : "")); // Mostra solo numeri interi
+
+        // Aggiungi etichetta per l'asse y
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", -margin.left + 10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("Occurrences");
 
         let tooltip = d3.select("#tooltip");
 
