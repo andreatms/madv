@@ -878,7 +878,7 @@
               d3.selectAll(".ranking-item-partial")
                 .filter(function () {
                   //return d3.select(this).text().includes(d.id);
-                  return d3.select(this).text().trim() === d.id;
+                  return d3.select(this).text().replace(/\(Matching Ingredients: \d+ \/ \d+\)/g, "").trim() === d.id;
                 })
                 .style("opacity", 1); // Cambia lo stile per evidenziare l'elemento
             }
