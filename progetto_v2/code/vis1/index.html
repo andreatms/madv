@@ -28,6 +28,7 @@
         background-color: #3498db;
         padding: 1rem;
         color: white;
+        text-align: center;
       }
 
       .header {
@@ -110,7 +111,7 @@
 
   <body>
     <header>
-      <h1>Visualizzazione 1</h1>
+      <h1>Meal Guide</h1>
     </header>
 
     <div class="container">
@@ -361,6 +362,8 @@
           .attr("y", height + margin.bottom - 10)
           .attr("text-anchor", "middle")
           .style("font-size", "14px")
+          .style("fill", "steelblue")
+          .style("font-weight", "bold")
           .text("Ingredients");
 
         svg.append("g")
@@ -374,6 +377,8 @@
           .attr("y", -margin.left + 10)
           .attr("text-anchor", "middle")
           .style("font-size", "14px")
+          .style("fill", "steelblue")
+          .style("font-weight", "bold")
           .text("Occurrences");
 
         let tooltip = d3.select("#tooltip");
