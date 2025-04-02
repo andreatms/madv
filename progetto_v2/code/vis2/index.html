@@ -12,12 +12,19 @@
         margin: 0;
         min-height: 100vh;
         background-color: #f5f5f5;
+        height: 800px; /* Altezza fissa */
+        width: 100%; /* Larghezza dinamica */
+        overflow: hidden; /* Disabilita lo scorrimento */
       }
 
       .container {
-        max-width: 1200px;
+        width: 100%; /* Larghezza pari a quella della pagina */
+        height: calc(100% - 100px); /* Altezza dinamica meno header e footer */
         margin: 0 auto;
-        padding: 2rem;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
       }
 
       header {
@@ -60,9 +67,173 @@
       }
 
       svg {
+        width: 100%; /* Larghezza dinamica */
+        height: 100%; /* Altezza dinamica */
         background-color: #f5f5f5;
         display: block;
         margin: auto;
+      }
+
+      /* Stile per la sidebar */
+      #filters {
+        position: absolute;
+        top: 120px;
+        left: 20px;
+        width: 250px;
+        padding: 15px;
+        background: #2c3e50;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        max-height: calc(100vh - 150px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #3498db #2c3e50;
+      }
+
+      #filters::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #filters::-webkit-scrollbar-thumb {
+        background-color: #3498db;
+        border-radius: 4px;
+      }
+
+      #filters::-webkit-scrollbar-track {
+        background-color: #2c3e50;
+      }
+
+      #filters h3 {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #f39c12;
+      }
+
+      #filters label {
+        display: block;
+        margin-bottom: 10px;
+        cursor: pointer;
+      }
+
+      #filters input[type="checkbox"] {
+        appearance: none; /* Rimuove lo stile predefinito */
+        width: 20px; /* Larghezza */
+        height: 20px; /* Altezza */
+        border: 2px solid #3498db; /* Bordo */
+        border-radius: 4px; /* Angoli arrotondati */
+        background-color: #2c3e50; /* Colore di sfondo */
+        cursor: pointer; /* Cambia il cursore */
+        transition: background-color 0.2s, border-color 0.2s; /* Transizioni */
+      }
+
+      #filters input[type="checkbox"]:checked {
+        background-color: #3498db; /* Colore di sfondo quando selezionata */
+        border-color: #2980b9; /* Cambia il colore del bordo */
+      }
+
+      #filters input[type="checkbox"]:hover {
+        border-color: #f39c12; /* Cambia il colore del bordo al passaggio del mouse */
+      }
+
+      #filters label span {
+        margin-left: 10px; /* Spaziatura tra la checkbox e il testo */
+        font-size: 14px; /* Dimensione del testo */
+        color: #ecf0f1; /* Colore del testo */
+      }
+
+      #filters span {
+        color: white;
+      }
+
+      #meal-list {
+        position: absolute;
+        top: 120px;
+        right: 20px;
+        width: 300px;
+        padding: 15px;
+        background: #2c3e50;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        max-height: calc(100vh - 150px);
+      }
+
+      /* Stile per la lista dei pasti */
+      #meal-list-div {
+        position: absolute;
+        top: 80px;
+        right: 20px;
+        width: 250px;
+        padding: 5px;
+        margin-right: 10px;;
+        background: #2c3e50;
+        color: white;
+        border-radius: 8px;
+        z-index: 1000;
+        max-height: calc(100vh - 300px);
+        overflow-y: auto;
+        scrollbar-width: thin;
+        scrollbar-color: #3498db #2c3e50;
+      }
+
+      #meal-list-div::-webkit-scrollbar {
+        width: 8px;
+      }
+
+      #meal-list-div::-webkit-scrollbar-thumb {
+        background-color: #3498db;
+        border-radius: 4px;
+      }
+
+      #meal-list-div::-webkit-scrollbar-track {
+        background-color: #2c3e50;
+      }
+
+      #meal-list-div p {
+        text-align: center;
+        margin-bottom: 10px;
+        color: #f39c12;
+      }
+
+      #meal-list-div ul {
+        list-style: none;
+        padding: 0;
+        margin-top: 0px;
+        margin-bottom: 0px;
+      }
+
+      #meal-list-div li {
+        margin-bottom: 5px;
+        padding: 5px;
+        background: #1abc9c;
+        border-radius: 4px;
+        text-align: center;
+        color: white;
+        cursor: pointer;
+        transition: background-color 0.2s;
+      }
+
+      #meal-list-div li:hover {
+        background: #16a085;
+      }
+
+      /* Stile per gli elementi <li> con testo "None" */
+      #none-meal {
+        background-color: #999999 !important;  /* Grigio */
+        color: white;
+        cursor: default; /* Disabilita il puntatore */
+      }
+
+      .chart-div {
+        position: absolute; /* Posizionamento assoluto */
+        top: 110px; /* Altezza dell'header (adatta se necessario) */
+        left: 0; /* Ancorato a sinistra */
+        width: 100%; /* Larghezza dinamica */
+        height: calc(100%); /* Altezza dinamica meno l'altezza dell'header */
+        border: 2px solid red; /* Bordo per evidenziare */
+        border-radius: 8px; /* Angoli arrotondati (opzionale) */
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombra per evidenziare */
       }
     </style>
   </head>
@@ -81,55 +252,44 @@
     <script>
       // Includere D3.js nel progetto
       // Assicurati di avere un elemento <div id="chart"></div> nel tuo HTML
-
-      const width = 800;
-      const height = 600;
-
       const container = d3.select("#chart-container").style("display", "flex");
+
+      // Imposta le dimensioni del grafico in base al contenitore
+      const chartContainer = document.querySelector("#chart-container");
+      const chartWidth = chartContainer.clientWidth; // Larghezza del contenitore
+      const chartHeight = chartContainer.clientHeight - 200; // Altezza del contenitore
+
       const filtersDiv = container
         .append("div")
         .attr("id", "filters")
         .style("width", "200px")
         .style("padding", "10px");
-      const chartDiv = container
+      let chartDiv = container
         .append("div")
-        .attr("class", "container")
-        .attr("id", "chart");
+        .attr("class", "chart-div")
+        .attr("id", "chart")
+        .style("width", "100%")
+        .style("height", "100%");
       const mealList = container
         .append("div")
         .attr("id", "meal-list")
-        .style("display", "none");
+        .style("display", "none")
+        .style("height", "70%");
 
       // Creazione del canvas SVG
 
-      let svg = chartDiv
+      let svg = d3
+        .select("#chart")
         .append("svg")
-        .attr("width", width)
-        .attr("height", height)
+        .attr("width", chartWidth) // Larghezza dinamica
+        .attr("height", chartHeight) // Altezza dinamica
         .on("click", function (event) {
-          // Verifica se il clic è stato fatto su un cerchio (bolla)
           const isBubble = event.target.tagName === "circle";
-
           if (!isBubble) {
-            // Se non è stato cliccato su una bolla, chiudi la lista dei pasti
             hideMeals();
             selectedCategory = "";
           }
         });
-
-      /*
-        // Tooltip per interazione con il mouse
-        const tooltip = d3
-          .select("body")
-          .append("div")
-          .attr("id", "tooltip")
-          .style("position", "absolute")
-          .style("background", "rgba(0, 0, 0, 0.8)")
-          .style("color", "#fff")
-          .style("padding", "5px 10px")
-          .style("border-radius", "5px")
-          .style("display", "none");
-      */
 
       let categories = {};
       let mealsByCategory = {};
@@ -197,14 +357,11 @@
             chartDiv.select("svg").remove();
             svg = chartDiv
               .append("svg")
-              .attr("width", width)
-              .attr("height", height)
+              .attr("width", chartWidth)
+              .attr("height", chartHeight)
               .on("click", function (event) {
-                // Verifica se il clic è stato fatto su un cerchio (bolla)
                 const isBubble = event.target.tagName === "circle";
-
                 if (!isBubble) {
-                  // Se non è stato cliccato su una bolla, chiudi la lista dei pasti
                   hideMeals();
                   selectedCategory = "";
                 }
@@ -217,24 +374,42 @@
           });
       }
 
+      // Aggiorna il layout del bubble chart
       function createBubbleChart() {
-        const categoryData = Object.entries(categories).map(
-          ([category, count]) => ({
-            category,
-            count,
-          })
-        );
+        const categoryData = Object.entries(categories).map(([category, count]) => ({
+          category,
+          count,
+        }));
 
-        const bubble = d3.pack().size([width, height]).padding(5)(
-          d3.hierarchy({ children: categoryData }).sum((d) => d.count)
-        );
+        const bubble = d3
+          .pack()
+          .size([chartWidth, chartHeight]) // Usa le dimensioni dinamiche
+          .padding(5)(
+            d3.hierarchy({ children: categoryData }).sum((d) => d.count)
+          );
+
+        const maxRadius = 250; // Imposta un raggio massimo basato sulle dimensioni del contenitore
+
+        const nodesData = bubble.leaves().map((d) => ({
+          x: d.x,
+          y: d.y,
+          r: Math.min(d.r * 1.3, maxRadius), // Limita il raggio massimo
+          category: d.data.category,
+          count: d.data.count,
+        }));
+
+        const simulation = d3
+          .forceSimulation(nodesData)
+          .force("x", d3.forceX(chartWidth / 2 - 90).strength(0.03)) // Maggiore forza orizzontale
+          .force("y", d3.forceY(chartHeight / 2 + 50).strength(0.1)) // Sposta il centro verso il basso (+50)
+          .force("collision", d3.forceCollide().radius((d) => d.r + 5)) // Evita collisioni
+          .on("tick", ticked);
 
         const nodes = svg
-          .selectAll("circle")
-          .data(bubble.leaves())
+          .selectAll("g")
+          .data(nodesData)
           .enter()
-          .append("g")
-          .attr("transform", (d) => `translate(${d.x},${d.y})`);
+          .append("g");
 
         const tooltip = d3
           .select("body")
@@ -249,25 +424,24 @@
         nodes
           .append("circle")
           .attr("r", (d) => d.r)
-          .attr("fill", "steelblue")
-          .attr("opacity", 0.7)
+          .attr("fill", "#3498DB")
+          .attr("opacity", 1)
           .on("mouseover", function (event, d) {
             tooltip
               .style("left", event.pageX + 10 + "px")
               .style("top", event.pageY + 10 + "px")
               .style("display", "block")
-              .text(`${d.data.category}: ${d.data.count} meals`);
+              .text(`${d.category}: ${d.count} meals`);
           })
           .on("mouseout", function () {
-            // Nascondi tooltip
             tooltip.style("display", "none");
           })
           .on("click", function (event, d) {
             if (
               d3.select("#meal-list").style("display") == "none" ||
-              d.data.category != selectedCategory
+              d.category != selectedCategory
             ) {
-              showMeals(d.data.category);
+              showMeals(d.category);
             } else {
               hideMeals();
             }
@@ -278,17 +452,26 @@
           .attr("dy", ".3em")
           .attr("text-anchor", "middle")
           .style("fill", "white")
-          .style("font-size", "12px")
-          .text((d) => d.data.category);
+          .style("font-size", (d) => `${Math.max(d.r / 4, 10)}px`) // Calcola la dimensione del font
+          .text((d) => d.category);
+
+        function ticked() {
+          nodes.attr("transform", (d) => `translate(${d.x},${d.y})`);
+        }
       }
 
       function showMeals(category) {
         selectedCategory = category;
 
-        const mealListDiv = d3.select("#meal-list");
-        mealListDiv.style("display", "block");
-        mealListDiv.html(`<p> ${category} Meals </p>`);
+        const mealListContainer = d3.select("#meal-list");
+        mealListContainer.selectAll("*").remove(); // Rimuovi il contenuto precedente
+        mealListContainer.style("display", "block");
+        mealListContainer
+          .append("h3")
+          .html(`${category} Meals`)
+          .style("text-align", "center");
 
+        const mealListDiv = mealListContainer.append("div").attr("id", "meal-list-div"); 
         const ul = mealListDiv.append("ul");
         if (
           mealsByCategory[category] != null &&
@@ -298,7 +481,7 @@
             ul.append("li").text(meal);
           });
         } else {
-          ul.append("li").text("None");
+          ul.append("li").text("None").attr("id", "none-meal"); // Aggiungi un ID per lo stile
         }
       }
 
