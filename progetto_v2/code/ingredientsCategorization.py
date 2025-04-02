@@ -33,7 +33,9 @@ categories = {
                               "Oil", "Oyster Sauce", "Sunflower Oil", "Tomato Ketchup", "Vegetable Oil", "Dijon Mustard", "Tabasco", "Hotsauce", "Enchilada Sauce", "Passata", "Vinaigrette Dressing", 
                               "Salsa", "Duck Sauce", "Rice Vinegar", "Gochujang", "Vinegar", "Green Curry Paste", "Barbeque Sauce", "Harissa", "Truffle Oil", "Italian Seasoning", "Mirin"},
     "Nuts and Seeds": {"Peanuts", "Almonds", "Walnuts", "Sesame Seed", "Pine nuts", "Pecan Nuts", "Hazlenuts", "Dried Fruit", "Cashews"},
-    "Sweeteners": {"Sugar", "Honey", "Maple Syrup", "Golden Syrup", "Brown Sugar", "Black Tracle"},
+    #"Sweeteners": {"Sugar", "Honey", "Maple Syrup", "Golden Syrup", "Brown Sugar", "Black Tracle"},
+    #"Stocks": {"Beef Stock", "Chicken Stock", "Fish Stock", "Vegetable Stock"},
+    #"Beverages":{"Red Wine", "White Wine", "Brandy", "Stout", "Sake", "Wine", "Ginger Cordial"},
     "Others": set()  # Categoria per gli ingredienti non classificati
 }
 
