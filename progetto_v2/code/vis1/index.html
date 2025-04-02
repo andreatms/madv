@@ -12,15 +12,22 @@
         margin: 0;
         min-height: 100vh;
         background-color: #f5f5f5;
+        overflow: hidden; /* Prevent scrolling */
       }
 
       .container {
         display: flex;
-        justify-content: center;
         align-items: center;
-        max-width: 1200px;
+        max-width: 1300px;
         margin: 0 auto;
-        padding: 0;
+        padding: 1rem;
+        gap: 50px;
+      }
+
+      header {
+        background-color: #3498db;
+        padding: 1rem;
+        color: white;
       }
 
       .header {
@@ -57,11 +64,10 @@
       }
 
       .zoom-buttons {
-        position: absolute;
-        bottom: 250px;
-        left: 25px;
+        flex: 0 1 120px; /* Dimensione fissa per i bottoni */
         display: flex;
         flex-direction: column;
+        margin-left: -80px;
       }
 
       .zoom-buttons button {
@@ -80,21 +86,18 @@
       }
 
       #map {
-        flex: 1;
+        width: 900px;
         height: 600px;
-        /*width: 800px;*/
-        background-color: #e0e0e0; /* Set the background color of the map container */
+        background-color: #e0e0e0;
       }
 
       #barchart {
-        width: 200px;
-        margin-left: 20px;
+        flex: 0 1 200px;
       }
       
       .hidden {
         visibility: hidden;
       }
-      
 
       svg {
         background-color: #f5f5f5;
@@ -141,18 +144,8 @@
 
 
     <script>
-
       var map = L.map('map', { zoomControl: false }).setView([20, 0], 2);
 
-      /*
-      // Aggiungere il layer di base
-      var baseLayer = L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-          attribution: '&copy; OpenStreetMap contributors'
-      }).addTo(map);
-      */
-      
-
-      // Mappatura manuale tra i nomi dei paesi nei meals e quelli nel GeoJSON
       const countryMapping = {
           "American": "USA",
           "British": "England",
@@ -167,213 +160,285 @@
           "Thai": "Thailand"
       };
 
-      // Funzione per ottenere il nome corretto del paese
       function getMappedCountry(mealCountry) {
           return countryMapping[mealCountry] || mealCountry; // Se non mappato, restituisce il nome originale
       }
 
-      // Creare un dizionario per contare i meals per paese
       let mealsByCountry = {};
       let mealsListByCountry = {};
       let ingredientsByCountry = {};
 
-      // Variabile per il layer GeoJSON
       let geoJsonLayer;
 
-      // Caricare i dati GeoJSON delle nazioni e il dataset dei meals
       Promise.all([
           fetch('world.geojson').then(res => res.json()), 
-          fetch('../../data/meals.json').then(res => res.json()),
-          fetch('../../data/ingredients.json').then(res => res.json())
+          fetch('../../data/meals_corrected.json').then(res => res.json()),
+          fetch('../../data/ingredients_corrected.json').then(res => res.json())
       ]).then(([geoData, mealsData, ingredientsData]) => {
-          
-
           Object.values(mealsData).forEach(meal => {
-              let country = getMappedCountry(meal.area.trim());
-              if (country) {
-                mealsByCountry[country] = (mealsByCountry[country] || 0) + 1;
-                if(ingredientsByCountry[country] == null){
-                  ingredientsByCountry[country] = {};
-                }
+            let country = getMappedCountry(meal.area.trim());
+            if (country) {
+              mealsByCountry[country] = (mealsByCountry[country] || 0) + 1;
+              if(ingredientsByCountry[country] == null){
+                ingredientsByCountry[country] = {};
               }
-              meal.ingredients.forEach(ingredient => {
-                ingredientsByCountry[country][ingredient] = (ingredientsByCountry[country][ingredient] || 0) + 1;
-                console.log(ingredientsByCountry[country][ingredient]);
-              });
-          });
-          
-          // Funzione per ottenere il colore in base al numero di meals
-          function getColor(d) {
-              return d > 50 ? '#800026' :
-                    d > 30 ? '#BD0026' :
-                    d > 20 ? '#E31A1C' :
-                    d > 10 ? '#FC4E2A' :
-                    d > 5  ? '#FD8D3C' :
-                    d > 1  ? '#FEB24C' : "#DCDCDC";
-          }
-          
-          function style(feature) {
-              return {
-                  fillColor: getColor(mealsByCountry[feature.properties.name] || 0),
-                  weight: 1,
-                  opacity: 1,
-                  color: 'white',
-                  fillOpacity: 0.7
-                  //fillOpacity: getColor(mealsByCountry[feature.properties.name] || 0) ? 0.7 : 0
-              };
-          }
-
-          function onEachFeature(feature, layer) {
-            let country = feature.properties.name; // Nome del paese nel GeoJSON
-            let mealCount = mealsByCountry[country] || 0; // Usa il count o 0 se non esiste
-            let mealsList = mealsListByCountry[country] || [];
-            
-            let popupContent = `<b>${country}</b><br>Meals count: ${mealCount}<br><ul>`;
-            
-            if (mealsList.length > 0) {
-                mealsList.forEach(meal => {
-                    popupContent += `<li>${meal}</li>`;
-                });
-            } 
-            popupContent += '</ul>';
-            
-            layer.bindPopup(popupContent);
-
-            layer.on('click', function(event) {
-              updateBarChart(country);
+            }
+            meal.ingredients.forEach(ingredient => {
+              ingredientsByCountry[country][ingredient] = (ingredientsByCountry[country][ingredient] || 0) + 1;
+              console.log(ingredientsByCountry[country][ingredient]);
             });
-          }
-
-          geoJsonLayer = L.geoJson(geoData, {
-              style: style,
-              onEachFeature: onEachFeature
-          }).addTo(map);
-      });
-
-
-    function updateBarChart(country) {
-
-    // Estrai i primi 5 ingredienti più usati
-    let data = Object.entries(ingredientsByCountry[country] || {})
-                     .sort((a, b) => b[1] - a[1])  // Ordina per quantità
-                     .slice(0, 5); // Prendi i primi 5
-
-    // Seleziona il contenitore del barchart
-    let chartContainer = d3.select("#barchart");
-
-    // Se non ci sono dati, esci
-    if (data.length === 0){
-      //chartContainer.style("display", "none");
-      chartContainer.classed("hidden", true);
-      map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
-      return;
-    } 
-
-    //chartContainer.style("display", "block");
-    chartContainer.classed("hidden", false);
-
-    let width = 200, height = 150, margin = { top: 150, right: 30, bottom: 150, left: 100 };
-
-    let svg = chartContainer.html("")
-                .append("svg")
-                .attr("width", width + margin.left + margin.right)
-                .attr("height", height + margin.top + margin.bottom)
-                .append("g")
-                .attr("transform", `translate(${margin.left},${margin.top})`);
-
-    // **Calcola il massimo solo per il paese selezionato**
-    let localMaxIngredientCount = d3.max(data, d => d[1]) || 1; // Evita problemi se vuoto
-
-    // Scale per gli assi
-    let x = d3.scaleBand()
-              .domain(data.map(d => d[0]))  // Ingredienti
-              .range([0, width])
-              .padding(0.3);
-
-    let y = d3.scaleLinear()
-              .domain([0, localMaxIngredientCount])
-              .nice()
-              .range([height, 0]);
-
-    // Aggiungere assi X e Y
-    svg.append("g")
-       .attr("transform", `translate(0,${height})`)
-       .call(d3.axisBottom(x))
-       .selectAll("text")  // Ruota i nomi degli ingredienti per leggibilità
-       .attr("transform", "rotate(-45)")
-       .attr("text-anchor", "end")
-       .style("font-size", "12px");
-
-    svg.append("g")
-       //.call(d3.axisLeft(y));
-       .call(d3.axisLeft(y).ticks(6));
-
-    // Seleziona il tooltip
-    let tooltip = d3.select("#tooltip");
-
-    // Disegna le barre con eventi mouseover e mouseout
-    svg.selectAll("rect")
-      .data(data)
-      .enter()
-      .append("rect")
-      .attr("x", d => x(d[0]))
-      .attr("y", d => y(d[1]))
-      .attr("width", x.bandwidth())
-      .attr("height", d => height - y(d[1]))
-      .attr("fill", "steelblue")
-      .on("mouseover", function(event, d) {
-          tooltip.style("visibility", "visible")
-                  .text(`${d[0]}: ${d[1]}`) // Mostra il nome dell'ingrediente e la quantità
-                  .style("left", (event.pageX + 10) + "px")
-                  .style("top", (event.pageY - 20) + "px");
-          d3.select(this).attr("fill", "orange"); // Cambia colore per evidenziare
-      })
-      .on("mousemove", function(event) {
-          tooltip.style("left", (event.pageX + 10) + "px")
-                  .style("top", (event.pageY - 20) + "px");
-      })
-      .on("mouseout", function() {
-          tooltip.style("visibility", "hidden");
-          d3.select(this).attr("fill", "steelblue"); // Ripristina il colore originale
-      });
-
-    // **Rimuove qualsiasi listener precedente per evitare duplicati**
-    document.removeEventListener("click", hideChart);
-
-    function hideChart(event) {
-      let chartContainer = document.querySelector("#barchart");
+          });
       
-      // Se il click è dentro il barchart o su una nazione, non fare nulla
-      if (chartContainer.contains(event.target) || event.target.tagName === "path") {
-          return;
+      function getColor(d) {
+          return d > 50 ? '#800026' :
+                d > 30 ? '#BD0026' :
+                d > 20 ? '#E31A1C' :
+                d > 10 ? '#FC4E2A' :
+                d > 5  ? '#FD8D3C' :
+                d > 1  ? '#FEB24C' : "#DCDCDC";
+      }
+      
+      function style(feature) {
+          return {
+              fillColor: getColor(mealsByCountry[feature.properties.name] || 0),
+              weight: 1,
+              opacity: 1,
+              color: 'white',
+              fillOpacity: 0.7
+          };
       }
 
-      // Altrimenti nascondi il grafico
-      //chartContainer.style.display = "none";
-      chartContainer.classList.add("hidden");
-      map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
-    }
+      function onEachFeature(feature, layer) {
+        let country = feature.properties.name; // Nome del paese nel GeoJSON
+        let mealCount = mealsByCountry[country] || 0; // Usa il count o 0 se non esiste
+        let mealsList = mealsListByCountry[country] || [];
+        
+        let popupContent = `<b>${country}</b><br>Meals count: ${mealCount}<br><ul>`;
+        
+        if (mealsList.length > 0) {
+            mealsList.forEach(meal => {
+                popupContent += `<li>${meal}</li>`;
+            });
+        } 
+        popupContent += '</ul>';
+        
+        layer.bindPopup(popupContent);
 
-    document.addEventListener("click", hideChart);    
+        layer.on('click', function(event) {
+          updateBarChart(country);
+        });
+      }
 
-    }
+      geoJsonLayer = L.geoJson(geoData, {
+        style: style,
+        onEachFeature: onEachFeature
+      }).addTo(map);
 
-    function zoomToRegion(region) {
-      const regions = {
-        'America': [50, -110, 3],
-        'Europe': [45, 10, 4],
-        'Asia': [34.0479, 100.6197, 3.4]
-      };
+      // Aggiungi una legenda con gradiente lineare
+      const legendSvg = d3.select("#map").append("svg")
+        .attr("id", "legend")
+        .attr("width", 200)
+        .attr("height", 60)
+        .style("position", "absolute")
+        .style("bottom", "50px")
+        .style("left", "20px")
+        .style("z-index", "1000"); // Assicurati che sia sopra la mappa
 
-      const [lat, lng, zoom] = regions[region];
-      map.setView([lat, lng], zoom);
-    }
+      // Definisci il gradiente lineare
+      const gradient = legendSvg.append("defs")
+        .append("linearGradient")
+        .attr("id", "gradient")
+        .attr("x1", "0%")
+        .attr("y1", "0%")
+        .attr("x2", "100%")
+        .attr("y2", "0%");
 
-    function resetView() {
-      map.setView([20, 0], 2);
-      //baseLayer.addTo(map); // Re-add the base layer to ensure the map is visible
-      geoJsonLayer.addTo(map); // Re-add the GeoJSON layer to ensure the map is colored
-    }
+      // Aggiungi i colori al gradiente
+      gradient.append("stop")
+        .attr("offset", "0%")
+        .attr("stop-color", "#DCDCDC"); // Colore iniziale
+
+      gradient.append("stop")
+        .attr("offset", "20%")
+        .attr("stop-color", "#FEB24C");
+
+      gradient.append("stop")
+        .attr("offset", "40%")
+        .attr("stop-color", "#FD8D3C");
+
+      gradient.append("stop")
+        .attr("offset", "60%")
+        .attr("stop-color", "#FC4E2A");
+
+      gradient.append("stop")
+        .attr("offset", "80%")
+        .attr("stop-color", "#E31A1C");
+
+      gradient.append("stop")
+        .attr("offset", "100%")
+        .attr("stop-color", "#800026"); // Colore finale
+
+      // Disegna il rettangolo con il gradiente
+      legendSvg.append("rect")
+        .attr("x", 10)
+        .attr("y", 10)
+        .attr("width", 180)
+        .attr("height", 20)
+        .style("fill", "url(#gradient)");
+
+      // Aggiungi l'asse con i valori
+      const scale = d3.scaleLinear()
+        .domain([0, 50]) // Cambia il massimo in base ai tuoi dati
+        .range([10, 190]);
+
+      const axis = d3.axisBottom(scale)
+        .ticks(6)
+        .tickFormat(d => d === 50 ? `> ${d}` : d); // Mostra "> 50" per il valore massimo
+
+      legendSvg.append("g")
+        .attr("transform", "translate(0, 35)")
+        .call(axis);
+
+      });
+
+      function updateBarChart(country) {
+
+        let data = Object.entries(ingredientsByCountry[country] || {})
+                          .sort((a, b) => b[1] - a[1])  // Ordina per quantità
+                          .slice(0, 5); // Prendi i primi 5
+
+        let chartContainer = d3.select("#barchart");
+
+        if (data.length === 0){
+          chartContainer.classed("hidden", true);
+          map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
+          return;
+        } 
+
+        chartContainer.classed("hidden", false);
+
+        let width = 170, height = 150, margin = { top: 80, right: 40, bottom: 100, left: 50 };
+
+        let svg = chartContainer.html("")
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Aggiungi un titolo al bar chart
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", -50) // Posiziona il titolo sopra il grafico
+          .attr("text-anchor", "middle")
+          .style("font-size", "16px")
+          .style("font-weight", "bold")
+          .text(`Top 5 Ingredients in ${country}`);
+
+        let localMaxIngredientCount = d3.max(data, d => d[1]) || 1; // Evita problemi se vuoto
+
+        let x = d3.scaleBand()
+          .domain(data.map(d => d[0]))  // Ingredienti
+          .range([0, width])
+          .padding(0.3);
+
+        let y = d3.scaleLinear()
+          .domain([0, localMaxIngredientCount])
+          .nice()
+          .range([height, 0]);
+
+        svg.append("g")
+          .attr("transform", `translate(0,${height})`)
+          .call(d3.axisBottom(x))
+          .selectAll("text")  // Ruota i nomi degli ingredienti per leggibilità
+          .attr("transform", "rotate(-45)")
+          .attr("text-anchor", "end")
+          .style("font-size", "12px");
+
+        // Aggiungi etichetta per l'asse x
+        svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + margin.bottom - 10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("Ingredients");
+
+        svg.append("g")
+          .call(d3.axisLeft(y).ticks(6) // Numero massimo di tick
+            .tickFormat(d => Number.isInteger(d) ? d : "")); // Mostra solo numeri interi
+
+        // Aggiungi etichetta per l'asse y
+        svg.append("text")
+          .attr("transform", "rotate(-90)")
+          .attr("x", -height / 2)
+          .attr("y", -margin.left + 10)
+          .attr("text-anchor", "middle")
+          .style("font-size", "14px")
+          .text("Occurrences");
+
+        let tooltip = d3.select("#tooltip");
+
+        svg.selectAll("rect")
+          .data(data)
+          .enter()
+          .append("rect")
+          .attr("x", d => x(d[0]))
+          .attr("y", d => y(d[1]))
+          .attr("width", x.bandwidth())
+          .attr("height", d => height - y(d[1]))
+          .attr("fill", "steelblue")
+          .on("mouseover", function(event, d) {
+              tooltip.style("visibility", "visible")
+                .text(`${d[0]}: ${d[1]}`) // Mostra il nome dell'ingrediente e la quantità
+                .style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px");
+              d3.select(this).attr("fill", "orange"); // Cambia colore per evidenziare
+          })
+          .on("mousemove", function(event) {
+              tooltip.style("left", (event.pageX + 10) + "px")
+                .style("top", (event.pageY - 20) + "px");
+          })
+          .on("mouseout", function() {
+              tooltip.style("visibility", "hidden");
+              d3.select(this).attr("fill", "steelblue"); // Ripristina il colore originale
+          });
+
+      // **Rimuove qualsiasi listener precedente per evitare duplicati**
+        document.removeEventListener("click", hideChart);
+
+        function hideChart(event) {
+          let chartContainer = document.querySelector("#barchart");
+          
+          // Se il click è dentro il barchart o su una nazione, non fare nulla
+          if (chartContainer.contains(event.target) || event.target.tagName === "path") {
+              return;
+          }
+
+          // Altrimenti nascondi il grafico
+          chartContainer.classList.add("hidden");
+          map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
+        }
+
+        document.addEventListener("click", hideChart);    
+
+      }
+
+      function zoomToRegion(region) {
+        const regions = {
+          'America': [50, -110, 3],
+          'Europe': [45, 10, 4],
+          'Asia': [34.0479, 100.6197, 3.4]
+        };
+
+        const [lat, lng, zoom] = regions[region];
+        map.setView([lat, lng], zoom);
+      }
+
+      function resetView() {
+        map.setView([20, 0], 2);
+        //baseLayer.addTo(map); // Re-add the base layer to ensure the map is visible
+        geoJsonLayer.addTo(map); // Re-add the GeoJSON layer to ensure the map is colored
+      }
 
     </script>
 
