@@ -30,6 +30,7 @@
                 background-color: #3498db;
                 padding: 1rem;
                 color: white;
+                text-align: center;
             }
 
             .header {
@@ -101,6 +102,11 @@
                 border-radius: 3px;
             }
 
+            .legend-item.dimmed {
+                opacity: 0.2;
+                transition: opacity 0.2s;
+            }
+
             svg {
                 background-color: #f5f5f5;
                 display: block;
@@ -135,7 +141,7 @@
 
     <body>
         <header>
-            <h1>Visualizzazione 4</h1>
+            <h1>Meal Guide</h1>
         </header>
 
         <footer>
@@ -170,7 +176,7 @@
         <script>
             const mealsFile = "../../data/meals_corrected.json";
             const categoriesFile = "../../data/categorized_ingredients.json";
-            
+
             Promise.all([
                 fetch(mealsFile).then(response => response.json()),
                 fetch(categoriesFile).then(response => response.json())
@@ -190,10 +196,48 @@
                     }
                 });
 
+                const categoryCount = {};
+                Object.entries(ingredientCount).forEach(([ingredient, count]) => {
+                    const category = ingredientCategories[ingredient] || "Unknown";
+                    categoryCount[category] = (categoryCount[category] || 0) + 1;
+                });
+
+                const sortedCategories = Object.entries(categoryCount)
+                    .sort((a, b) => b[1] - a[1])
+                    .map(([category]) => category);
+
                 const uniqueCategories = [...new Set(Object.values(ingredientCategories))];
+
                 const colorScale = d3.scaleOrdinal()
                     .domain(uniqueCategories)
-                    .range(d3.schemeCategory10.concat(d3.schemeSet3));
+                    .range(d3.schemeCategory10);
+
+                // Determina le tre categorie principali con il maggior numero di rettangoli
+                const topCategories = sortedCategories.slice(0, 3);
+
+                // Assegna i colori blu, rosso e verde alle tre categorie principali
+                const customColors = {
+                    [topCategories[0]]: colorScale.range()[0], // Blu
+                    [topCategories[1]]: colorScale.range()[3], // Rosso
+                    [topCategories[2]]: colorScale.range()[2]  // Verde
+                };
+
+                console.log("Top 3 categories:", topCategories);
+                console.log(topCategories[0], topCategories[1], topCategories[2]);
+                console.log(colorScale.range()[0], colorScale.range()[3], colorScale.range()[2]);
+
+                // Rimuovi i colori assegnati in customColors dalla scala colorScale
+                const usedColors = Object.values(customColors);
+                const remainingColors = colorScale.range().filter(color => !usedColors.includes(color));
+                const filteredColorScale = d3.scaleOrdinal()
+                    .domain(uniqueCategories.filter(category => !topCategories.includes(category)))
+                    .range(remainingColors)
+                    .unknown("gray");
+
+                // Funzione per ottenere il colore di una categoria
+                function getCategoryColor(category) {
+                    return customColors[category] || filteredColorScale(category); // Usa customColors per le categorie principali, altrimenti usa filteredColorScale
+                }
 
                 const slider = d3.select("#occurrence-slider");
                 const sliderValue = d3.select("#slider-value");
@@ -215,6 +259,42 @@
                                 category: ingredientCategories[ingredient] || "Unknown"
                             }))
                     };
+
+                    // Calcola il numero di rettangoli per ciascuna categoria
+                    const categoryCounts = {};
+                    filteredData.children.forEach(child => {
+                        const category = child.category;
+                        categoryCounts[category] = (categoryCounts[category] || 0) + 1;
+                    });
+
+                    // Stampa il numero di rettangoli per ciascuna categoria
+                    console.log("Numero di rettangoli per categoria:", categoryCounts);
+
+                    // Determina le tre categorie principali con il maggior numero di rettangoli
+                    const topCategories = Object.entries(categoryCounts)
+                        .sort((a, b) => b[1] - a[1])
+                        .slice(0, 3)
+                        .map(([category]) => category);
+
+                    // Assegna i colori blu, rosso e verde alle tre categorie principali
+                    const customColors = {
+                        [topCategories[0]]: colorScale.range()[0], // Blu
+                        [topCategories[1]]: colorScale.range()[3], // Rosso
+                        [topCategories[2]]: colorScale.range()[2]  // Verde
+                    };
+
+                    // Rimuovi i colori assegnati in customColors dalla scala colorScale
+                    const usedColors = Object.values(customColors);
+                    const remainingColors = colorScale.range().filter(color => !usedColors.includes(color));
+                    const filteredColorScale = d3.scaleOrdinal()
+                        .domain(uniqueCategories.filter(category => !topCategories.includes(category)))
+                        .range(remainingColors)
+                        .unknown("gray");
+
+                    // Funzione per ottenere il colore di una categoria
+                    function getCategoryColor(category) {
+                        return customColors[category] || filteredColorScale(category);
+                    }
 
                     d3.select("#treemap").selectAll("*").remove();
 
@@ -245,7 +325,7 @@
                     const rects = cell.append("rect")
                         .attr("width", d => d.x1 - d.x0)
                         .attr("height", d => d.y1 - d.y0)
-                        .attr("fill", d => colorScale(d.data.category))
+                        .attr("fill", d => getCategoryColor(d.data.category)) // Usa la funzione getCategoryColor
                         .attr("stroke", "#fff")
                         .attr("stroke-width", 1)
                         .on("mouseover", (event, d) => {
@@ -266,37 +346,39 @@
                         .attr("text-anchor", "middle")
                         .attr("dominant-baseline", "middle")
                         .text(d => d.data.name)
-                        .attr("font-size", d => Math.max(10, Math.min((d.x1 - d.x0) / 6, (d.y1 - d.y0) / 3))) // Adjust font size proportionally
-                        //.attr("font-size", "12px")
-                        //.style("fill", "white")
+                        .attr("font-size", d => Math.max(10, Math.min((d.x1 - d.x0) / 6, (d.y1 - d.y0) / 3)))
                         .attr("fill", "white")
-                        //.attr("font-weight", "bold")
-                        //.attr("opacity", d => (d.x1 - d.x0 > 30 && d.y1 - d.y0 > 20) ? 1 : 0); // Show only if space allows
                         .attr("opacity", function(d) {
-                            const textLength = this.getComputedTextLength();  // Ottiene la lunghezza del testo in pixel
-                            const rectWidth = d.x1 - d.x0;  // Larghezza del rettangolo
-                            const rectHeight = d.y1 - d.y0;  // Altezza del rettangolo
-
+                            const textLength = this.getComputedTextLength();
+                            const rectWidth = d.x1 - d.x0; 
+                            const rectHeight = d.y1 - d.y0; 
                             return (textLength < rectWidth - 10 && rectHeight > 25) ? 1 : 0;
-                        })
+                        });
 
                     d3.select("#legend").selectAll("*").remove();
+
+                    uniqueCategories.sort();
 
                     uniqueCategories.forEach(category => {
                         const item = d3.select("#legend").append("div")
                             .attr("class", "legend-item")
-                            .on("mouseover", () => {
+                            .on("mouseover", function () {
+                                d3.selectAll(".legend-item").style("opacity", 0.2);
+                                d3.select(this).style("opacity", 1);
+
                                 rects.transition().duration(200)
                                     .attr("opacity", d => d.data.category === category ? 1 : 0.2);
                             })
-                            .on("mouseout", () => {
+                            .on("mouseout", function () {
+                                d3.selectAll(".legend-item").style("opacity", 1);
+
                                 rects.transition().duration(200)
                                     .attr("opacity", 1);
                             });
 
                         item.append("div")
                             .attr("class", "legend-color")
-                            .style("background-color", colorScale(category));
+                            .style("background-color", getCategoryColor(category));
 
                         item.append("span").text(category);
                     });
