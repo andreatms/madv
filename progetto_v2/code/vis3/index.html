@@ -927,7 +927,7 @@
             .attr("cx", (d) => d.x)
             .attr("cy", (d) => d.y);
 
-          //drawBoundingBox(); // Disegna la bounding box
+          drawBoundingBox(); // Disegna la bounding box
           autoZoom();
         });
 
@@ -1041,22 +1041,6 @@
         updateGraph();
       }
 
-      /*
-    function updateNodeStyle(nodes, type) {
-      if (type == "related") {
-        nodes.forEach((node) => {
-          // Seleziona il nodo circle con l'id specificato
-          const circle = d3.select(`#node-${node.id.replace(/\s+/g, "_")}`);
-
-          // Controlla se il nodo esiste
-          if (!circle.empty()) {
-            circle.style("fill", "blue"); // Cambia colore a arancione
-          }
-        });
-      }
-    }
-    */
-
       function addRelatedMealsToGraph(ingredientId) {
         const relatedMeals = Object.entries(mealsData).filter(
           ([meal, details]) => details.ingredients.includes(ingredientId)
@@ -1165,19 +1149,26 @@
             .width || 0;
 
         const svgWidth =
-          d3.select("svg").attr("width") - sidebarWidth - rankingWidth;
-        const svgHeight = d3.select("svg").attr("height");
+          d3.select("svg").attr("width") - sidebarWidth - rankingWidth - 50; // 20px per margini
+        const svgHeight = d3.select("svg").attr("height") - 50; // 20px per margini
 
         // Calcola il fattore di scala per adattare il grafo all'SVG
-        const scaleFactor =
+        const tmpScaleFactor =
           Math.min(svgWidth / graphWidth, svgHeight / graphHeight) * 0.9;
+
+          const nodeMaxRadius = 25; // Raggio massimo del nodo
+          const nodeRadius = g.selectAll(".node").attr("r"); // Raggio del nodo
+          const nodeScaleFactor = nodeMaxRadius / nodeRadius; // Fattore di scala per il nodo
+
+
+          const scaleFactor = Math.min(tmpScaleFactor, nodeScaleFactor); // Limita il fattore di scala al massimo raggio del nodo
 
         // Calcola le traslazioni per centrare il grafo
         const translateX =
-          (svgWidth - graphWidth * scaleFactor) / 2 - bounds.minX * scaleFactor;
+          (svgWidth - graphWidth * scaleFactor) / 2 - bounds.minX * scaleFactor + 25;
         const translateY =
           (svgHeight - graphHeight * scaleFactor) / 2 -
-          bounds.minY * scaleFactor;
+          bounds.minY * scaleFactor + 25;
 
         // Applica la trasformazione con zoom e traslazione
         svg

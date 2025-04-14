@@ -111,7 +111,8 @@
       }
 
       #filters label {
-        display: block;
+        display: flex; /* Cambia da block a flex */
+        align-items: center; /* Centra verticalmente il contenuto */
         margin-bottom: 10px;
         cursor: pointer;
       }
@@ -140,6 +141,7 @@
         margin-left: 10px; /* Spaziatura tra la checkbox e il testo */
         font-size: 14px; /* Dimensione del testo */
         color: #ecf0f1; /* Colore del testo */
+        top: 50px;
       }
 
       #filters span {
@@ -316,7 +318,7 @@
       function createFilters() {
         filtersDiv.append("h3").text("Filter by area");
         areas.forEach((area) => {
-          const label = filtersDiv.append("label").style("display", "block");
+          const label = filtersDiv.append("label").style("display", "flex");
           label
             .append("input")
             .attr("type", "checkbox")
