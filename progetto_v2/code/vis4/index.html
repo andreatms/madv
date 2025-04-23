@@ -157,20 +157,16 @@
 
         <div id="slider-container" class="slider-container">
             <label for="occurrence-slider">Min Occurrences:</label>
-            <input type="range" id="occurrence-slider" min="1" max="10" value="1" step="1" list="ticks">
+            <input type="range" id="occurrence-slider" min="10" max="15" value="10" step="1" list="ticks">
             <datalist id="ticks">
-                <option value="1"></option>
-                <option value="2"></option>
-                <option value="3"></option>
-                <option value="4"></option>
-                <option value="5"></option>
-                <option value="6"></option>
-                <option value="7"></option>
-                <option value="8"></option>
-                <option value="9"></option>
                 <option value="10"></option>
+                <option value="11"></option>
+                <option value="12"></option>
+                <option value="13"></option>
+                <option value="14"></option>
+                <option value="15"></option>
             </datalist>
-            <span id="slider-value">1</span>
+            <span id="slider-value">10</span>
         </div>
 
         <script>
@@ -341,20 +337,102 @@
                         .on("mouseout", () => tooltip.style("display", "none"));
 
                     cell.append("text")
-                        .attr("x", d => (d.x1 - d.x0) / 2)
-                        .attr("y", d => (d.y1 - d.y0) / 2)
-                        .attr("text-anchor", "middle")
-                        .attr("dominant-baseline", "middle")
-                        .text(d => d.data.name)
-                        .attr("font-size", d => Math.max(10, Math.min((d.x1 - d.x0) / 6, (d.y1 - d.y0) / 3)))
-                        .attr("fill", "white")
-                        .attr("opacity", function(d) {
-                            const textLength = this.getComputedTextLength();
-                            const rectWidth = d.x1 - d.x0; 
-                            const rectHeight = d.y1 - d.y0; 
-                            return (textLength < rectWidth - 10 && rectHeight > 25) ? 1 : 0;
-                        });
+                        .attr("text-anchor", "middle") // Centra orizzontalmente il testo
+                        .each(function(d) {
+                            const words = d.data.name.split(" "); // Dividi il nome in parole
+                            const padding = 2; // Lo stesso valore di padding usato in d3.treemap().padding(2)
+                            const rectWidth = d.x1 - d.x0 - padding * 2; // Sottrai il padding dalla larghezza
+                            const rectHeight = d.y1 - d.y0 - padding * 2; // Sottrai il padding dall'altezza
 
+                            // Calcola la dimensione del testo in base alle dimensioni del rettangolo
+                            const fontSize = Math.max(10, Math.min(rectWidth / 7, rectHeight / 4));
+                            const lineHeight = fontSize * 1.2; // Distanza tra le righe proporzionale alla dimensione del testo
+                            const maxLines = Math.floor(rectHeight / lineHeight);
+
+                            const textElement = d3.select(this);
+                            let lineCount = 0;
+
+                            let currentLine = [];
+                            let lines = [];
+
+                            // Costruisci le righe di testo
+                            words.forEach((word) => {
+                                const testLine = [...currentLine, word].join(" ");
+                                const testTspan = textElement.append("tspan")
+                                    .text(testLine)
+                                    .attr("font-size", fontSize)
+                                    .attr("x", 0)
+                                    .attr("y", 0)
+                                    .attr("visibility", "hidden"); // Nascondi temporaneamente per calcolare la larghezza
+
+                                const testLineWidth = testTspan.node().getComputedTextLength();
+                                testTspan.remove(); // Rimuovi il tspan temporaneo
+
+                                if (testLineWidth <= rectWidth && lineCount < maxLines) {
+                                    currentLine.push(word);
+                                } else {
+                                    if (currentLine.length > 0) {
+                                        lines.push(currentLine.join(" "));
+                                        lineCount++;
+                                    }
+                                    currentLine = [word];
+                                }
+                            });
+
+                            // Aggiungi l'ultima riga, se presente
+                            if (currentLine.length > 0 && lineCount < maxLines) {
+                                lines.push(currentLine.join(" "));
+                            }
+
+                            // Calcola l'altezza totale del testo
+                            const totalTextHeight = lines.length * lineHeight;
+
+                            // Se il testo non entra nel rettangolo in altezza, non aggiungerlo
+                            if (totalTextHeight > rectHeight) {
+                                console.log(`Testo troppo alto per il rettangolo: ${d.data.name}`);
+                                textElement.remove();
+                                return;
+                            }
+
+                            // Controlla se una qualsiasi riga supera la larghezza del rettangolo
+                            const exceedsWidth = lines.some(line => {
+                                const testTspan = textElement.append("tspan")
+                                    .text(line)
+                                    .attr("font-size", fontSize)
+                                    .attr("x", 0)
+                                    .attr("y", 0)
+                                    .attr("visibility", "hidden"); // Nascondi temporaneamente per calcolare la larghezza
+
+                                const lineWidth = testTspan.node().getComputedTextLength();
+                                testTspan.remove(); // Rimuovi il tspan temporaneo
+                                return lineWidth > rectWidth;
+                            });
+
+                            if (exceedsWidth) {
+                                console.log(`Riga troppo larga per il rettangolo: ${d.data.name}`);
+                                textElement.remove();
+                                return;
+                            }
+
+                            // Calcola la posizione iniziale per centrare il testo verticalmente
+                            const startY = -totalTextHeight / 2 + lineHeight / 2;
+
+                            // Aggiungi le righe di testo come <tspan>
+                            lines.forEach((line, i) => {
+                                textElement.append("tspan")
+                                    .text(line)
+                                    .attr("x", 0) // Centra orizzontalmente rispetto al gruppo <text>
+                                    .attr("dy", i === 0 ? startY : lineHeight) // Posiziona verticalmente ogni riga
+                                    .attr("font-size", fontSize)
+                                    .attr("fill", "white");
+                            });
+                        })
+                        .attr("transform", function(d) {
+                            const rectWidth = d.x1 - d.x0;
+                            const rectHeight = d.y1 - d.y0;
+                            return `translate(${rectWidth / 2}, ${rectHeight / 2})`; // Centra il gruppo di testo nel rettangolo
+                        });
+                        
                     d3.select("#legend").selectAll("*").remove();
 
                     uniqueCategories.sort();
@@ -387,8 +465,11 @@
                 updateTreemap(+slider.property("value"));
             })
             .catch(error => console.error("Errore nel caricamento dei file:", error));
-        </script>
+        </script>        </script>
 
+
+
+</html>    </body>
     </body>
 </html>
 
