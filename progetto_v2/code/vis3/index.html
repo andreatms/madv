@@ -445,7 +445,8 @@
           .force(
             "center",
             d3.forceCenter(containerWidth / 2, containerHeight / 2)
-          );
+          )
+          .force("collision", d3.forceCollide().radius(20).strength(0.5));
       }
 
       // Funzione per aggiornare la visibilità e il raggio dei nodi pasto
@@ -479,7 +480,9 @@
           })
           .attr("r", (d) => {
             if (d.type === "meal") {
-              return Math.min(10 + (mealConnections[d.id] || 1) * 3, 30); // Raggio massimo 30
+              //return Math.min(10 * (mealConnections[d.id] || 1) * 3, 30); // Raggio massimo 30
+              var b = 10;
+              return b * Math.pow(mealConnections[d.id] || 1, 0.57);
             }
             return 10; // Raggio standard ingredienti
           })
@@ -817,13 +820,30 @@
         // Aggiungi nuovi nodi
         const nodeEnter = node
           .enter()
-          .append("circle")
+          .append((d) => {
+            if (d.type === "ingredient") {
+              return document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "rect"
+              );
+            } else {
+              return document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "circle"
+              );
+            }
+          })
           .attr("class", "node")
-          .attr("id", (d) => `node-${d.id.replace(/\s+/g, "_")}`) // Aggiungi un id basato sul nome del nodo
+          .attr("id", (d) => `node-${d.id.replace(/\s+/g, "_")}`)
           .attr("fill", (d) => {
-            d.originalColor = d.type === "ingredient" ? "#1abc9c" : "#e74c3c"; // Colore originale
+            d.originalColor = d.type === "ingredient" ? "#1abc9c" : "#e74c3c";
             return d.originalColor;
           })
+          .attr("width", (d) => (d.type === "ingredient" ? 20 : null)) // Larghezza per i quadrati
+          .attr("height", (d) => (d.type === "ingredient" ? 20 : null)) // Altezza per i quadrati
+          .attr("x", (d) => (d.type === "ingredient" ? d.x - 10 : null)) // Posizionamento orizzontale
+          .attr("y", (d) => (d.type === "ingredient" ? d.y - 10 : null)) // Posizionamento verticale
+          .attr("r", (d) => (d.type === "meal" ? 10 : null)) // Raggio per i cerchi
           .call(
             d3
               .drag()
@@ -832,7 +852,10 @@
               .on("end", dragEnded)
           )
           .on("mouseover", function (event, d) {
-            if (d.type === "meal" && d3.select(this).style("fill") !== "rgb(170, 170, 170)") {
+            if (
+              d.type === "meal" &&
+              d3.select(this).style("fill") !== "rgb(170, 170, 170)"
+            ) {
               const connectedNodes = new Set(
                 graphData.links
                   .filter(
@@ -854,18 +877,21 @@
                   : "#d3d3d3"
               ); // Sbiadisce gli archi
 
-              d3.selectAll(".link").filter((link) =>
-                link.source.id === d.id || link.target.id === d.id
-              ).raise(); 
+              d3.selectAll(".link")
+                .filter(
+                  (link) => link.source.id === d.id || link.target.id === d.id
+                )
+                .raise();
               d3.select(this).raise(); // Porta in primo piano il nodo selezionato
               d3.selectAll(".node")
-                .filter(
-                  (node) => connectedNodes.has(node.id)
-                )
+                .filter((node) => connectedNodes.has(node.id))
                 .raise(); // Porta in primo piano i nodi collegati
             }
 
-            if (d.type === "meal" && d3.select(this).style("fill") !== "rgb(170, 170, 170)") {
+            if (
+              d.type === "meal" &&
+              d3.select(this).style("fill") !== "rgb(170, 170, 170)"
+            ) {
               d3.selectAll(".ranking-item").style("opacity", 0.5); // Ripristina il colore originale
               d3.selectAll(".ranking-item")
                 .filter(function () {
@@ -878,7 +904,13 @@
               d3.selectAll(".ranking-item-partial")
                 .filter(function () {
                   //return d3.select(this).text().includes(d.id);
-                  return d3.select(this).text().replace(/\(Matching Ingredients: \d+ \/ \d+\)/g, "").trim() === d.id;
+                  return (
+                    d3
+                      .select(this)
+                      .text()
+                      .replace(/\(Matching Ingredients: \d+ \/ \d+\)/g, "")
+                      .trim() === d.id
+                  );
                 })
                 .style("opacity", 1); // Cambia lo stile per evidenziare l'elemento
             }
@@ -925,11 +957,28 @@
 
           g.selectAll(".node")
             .attr("cx", (d) => d.x)
-            .attr("cy", (d) => d.y);
+            .attr("cy", (d) => d.y)
+            .attr("x", (d) => d.x - 10)
+            .attr("y", (d) => d.y - 10);
 
-          drawBoundingBox(); // Disegna la bounding box
+          //drawBoundingBox(); // Disegna la bounding box
           autoZoom();
         });
+
+        // Conta quante connessioni ha ogni pasto
+        const mealConnections = {};
+        graphData.links.forEach((link) => {
+          if (link.target.type === "meal") {
+            mealConnections[link.target.id] =
+              (mealConnections[link.target.id] || 0) + 1;
+          }
+        });
+
+        simulation.force("collision").radius((d) => {
+          return d.type === "meal"
+            ? 10 * Math.pow(mealConnections[d.id] || 1, 0.57) + 10 // Calcolo del raggio per i nodi "meal"
+            : 20; // Raggio standard per gli altri nodi
+        }); // Imposta il raggio di collisione
 
         simulation.force("link").links(graphData.links);
         simulation.alpha(1).restart();
@@ -1156,19 +1205,21 @@
         const tmpScaleFactor =
           Math.min(svgWidth / graphWidth, svgHeight / graphHeight) * 0.9;
 
-          const nodeMaxRadius = 25; // Raggio massimo del nodo
-          const nodeRadius = g.selectAll(".node").attr("r"); // Raggio del nodo
-          const nodeScaleFactor = nodeMaxRadius / nodeRadius; // Fattore di scala per il nodo
+        const nodeMaxRadius = 25; // Raggio massimo del nodo
+        const nodeRadius = g.selectAll(".node").attr("r"); // Raggio del nodo
+        const nodeScaleFactor = nodeMaxRadius / nodeRadius; // Fattore di scala per il nodo
 
-
-          const scaleFactor = Math.min(tmpScaleFactor, nodeScaleFactor); // Limita il fattore di scala al massimo raggio del nodo
+        const scaleFactor = Math.min(tmpScaleFactor, nodeScaleFactor); // Limita il fattore di scala al massimo raggio del nodo
 
         // Calcola le traslazioni per centrare il grafo
         const translateX =
-          (svgWidth - graphWidth * scaleFactor) / 2 - bounds.minX * scaleFactor + 25;
+          (svgWidth - graphWidth * scaleFactor) / 2 -
+          bounds.minX * scaleFactor +
+          25;
         const translateY =
           (svgHeight - graphHeight * scaleFactor) / 2 -
-          bounds.minY * scaleFactor + 25;
+          bounds.minY * scaleFactor +
+          25;
 
         // Applica la trasformazione con zoom e traslazione
         svg
@@ -1266,6 +1317,6 @@
         simulation.force("center", d3.forceCenter(svgWidth / 2, svgHeight / 2));
         simulation.alpha(1).restart();
       });
-    </script>
+      </script>    
   </body>
 </html>
