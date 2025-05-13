@@ -435,9 +435,12 @@
                         
                     d3.select("#legend").selectAll("*").remove();
 
-                    uniqueCategories.sort();
+                    // Ottieni solo le categorie presenti nei dati filtrati
+                    const presentCategories = Array.from(
+                        new Set(filteredData.children.map(child => child.category))
+                    ).sort();
 
-                    uniqueCategories.forEach(category => {
+                    presentCategories.forEach(category => {
                         const item = d3.select("#legend").append("div")
                             .attr("class", "legend-item")
                             .on("mouseover", function () {
@@ -465,11 +468,7 @@
                 updateTreemap(+slider.property("value"));
             })
             .catch(error => console.error("Errore nel caricamento dei file:", error));
-        </script>        </script>
-
-
-
-</html>    </body>
+        </script>
     </body>
 </html>
 
