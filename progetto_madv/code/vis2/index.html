@@ -12,14 +12,14 @@
         margin: 0;
         min-height: 100vh;
         background-color: #f5f5f5;
-        height: 800px; /* Altezza fissa */
-        width: 100%; /* Larghezza dinamica */
-        overflow: hidden; /* Disabilita lo scorrimento */
+        height: 800px;
+        width: 100%;
+        overflow: hidden;
       }
 
       .container {
-        width: 100%; /* Larghezza pari a quella della pagina */
-        height: calc(100% - 100px); /* Altezza dinamica meno header e footer */
+        width: 100%;
+        height: calc(100% - 100px);
         margin: 0 auto;
         padding: 0;
         display: flex;
@@ -67,14 +67,13 @@
       }
 
       svg {
-        width: 100%; /* Larghezza dinamica */
-        height: 100%; /* Altezza dinamica */
+        width: 100%;
+        height: 100%;
         background-color: #f5f5f5;
         display: block;
         margin: auto;
       }
 
-      /* Stile per la sidebar */
       #filters {
         position: absolute;
         top: 120px;
@@ -111,36 +110,36 @@
       }
 
       #filters label {
-        display: flex; /* Cambia da block a flex */
-        align-items: center; /* Centra verticalmente il contenuto */
+        display: flex;
+        align-items: center;
         margin-bottom: 10px;
         cursor: pointer;
       }
 
       #filters input[type="checkbox"] {
-        appearance: none; /* Rimuove lo stile predefinito */
-        width: 20px; /* Larghezza */
-        height: 20px; /* Altezza */
-        border: 2px solid #3498db; /* Bordo */
-        border-radius: 4px; /* Angoli arrotondati */
-        background-color: #2c3e50; /* Colore di sfondo */
-        cursor: pointer; /* Cambia il cursore */
-        transition: background-color 0.2s, border-color 0.2s; /* Transizioni */
+        appearance: none;
+        width: 20px;
+        height: 20px;
+        border: 2px solid #3498db;
+        border-radius: 4px;
+        background-color: #2c3e50;
+        cursor: pointer;
+        transition: background-color 0.2s, border-color 0.2s;
       }
 
       #filters input[type="checkbox"]:checked {
-        background-color: #3498db; /* Colore di sfondo quando selezionata */
-        border-color: #2980b9; /* Cambia il colore del bordo */
+        background-color: #3498db;
+        border-color: #2980b9;
       }
 
       #filters input[type="checkbox"]:hover {
-        border-color: #f39c12; /* Cambia il colore del bordo al passaggio del mouse */
+        border-color: #f39c12;
       }
 
       #filters label span {
-        margin-left: 10px; /* Spaziatura tra la checkbox e il testo */
-        font-size: 14px; /* Dimensione del testo */
-        color: #ecf0f1; /* Colore del testo */
+        margin-left: 10px;
+        font-size: 14px;
+        color: #ecf0f1;
         top: 50px;
       }
 
@@ -161,7 +160,6 @@
         max-height: calc(100vh - 150px);
       }
 
-      /* Stile per la lista dei pasti */
       #meal-list-div {
         position: absolute;
         top: 80px;
@@ -222,22 +220,21 @@
       }
       */
 
-      /* Stile per gli elementi <li> con testo "None" */
       #none-meal {
-        background-color: #999999 !important;  /* Grigio */
+        background-color: #999999 !important;
         color: white;
-        cursor: default; /* Disabilita il puntatore */
+        cursor: default;
       }
 
       .chart-div {
-        position: absolute; /* Posizionamento assoluto */
-        top: 110px; /* Altezza dell'header (adatta se necessario) */
-        left: 0; /* Ancorato a sinistra */
-        width: 100%; /* Larghezza dinamica */
-        height: calc(100%); /* Altezza dinamica meno l'altezza dell'header */
-        border: none; /* Bordo per evidenziare */
-        border-radius: 8px; /* Angoli arrotondati (opzionale) */
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Ombra per evidenziare */
+        position: absolute;
+        top: 110px;
+        left: 0;
+        width: 100%;
+        height: calc(100%);
+        border: none;
+        border-radius: 8px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
       }
     </style>
   </head>
@@ -254,14 +251,11 @@
     <div class="container" id="chart-container"></div>
 
     <script>
-      // Includere D3.js nel progetto
-      // Assicurati di avere un elemento <div id="chart"></div> nel tuo HTML
       const container = d3.select("#chart-container").style("display", "flex");
 
-      // Imposta le dimensioni del grafico in base al contenitore
       const chartContainer = document.querySelector("#chart-container");
-      const chartWidth = chartContainer.clientWidth; // Larghezza del contenitore
-      const chartHeight = chartContainer.clientHeight - 200; // Altezza del contenitore
+      const chartWidth = chartContainer.clientWidth;
+      const chartHeight = chartContainer.clientHeight - 200;
 
       const filtersDiv = container
         .append("div")
@@ -280,13 +274,11 @@
         .style("display", "none")
         .style("height", "70%");
 
-      // Creazione del canvas SVG
-
       let svg = d3
         .select("#chart")
         .append("svg")
-        .attr("width", chartWidth) // Larghezza dinamica
-        .attr("height", chartHeight) // Altezza dinamica
+        .attr("width", chartWidth)
+        .attr("height", chartHeight)
         .on("click", function (event) {
           const isBubble = event.target.tagName === "circle";
           if (!isBubble) {
@@ -346,7 +338,6 @@
           .then((response) => response.json())
           .then((data) => {
             Object.values(data).forEach((meal) => {
-              console.log(selectedAreas);
               if (selectedAreas.has(meal.area) || selectedAreas.size == 0) {
                 categories[meal.category] =
                   (categories[meal.category] || 0) + 1;
@@ -378,7 +369,6 @@
           });
       }
 
-      // Aggiorna il layout del bubble chart
       function createBubbleChart() {
         const categoryData = Object.entries(categories).map(([category, count]) => ({
           category,
@@ -387,26 +377,26 @@
 
         const bubble = d3
           .pack()
-          .size([chartWidth, chartHeight]) // Usa le dimensioni dinamiche
+          .size([chartWidth, chartHeight])
           .padding(5)(
             d3.hierarchy({ children: categoryData }).sum((d) => d.count)
           );
 
-        const maxRadius = 250; // Imposta un raggio massimo basato sulle dimensioni del contenitore
+        const maxRadius = 250;
 
         const nodesData = bubble.leaves().map((d) => ({
           x: d.x,
           y: d.y,
-          r: Math.min(d.r * 1.3, maxRadius), // Limita il raggio massimo
+          r: Math.min(d.r * 1.3, maxRadius),
           category: d.data.category,
           count: d.data.count,
         }));
 
         const simulation = d3
           .forceSimulation(nodesData)
-          .force("x", d3.forceX(chartWidth / 2 - 90).strength(0.03)) // Maggiore forza orizzontale
-          .force("y", d3.forceY(chartHeight / 2 + 50).strength(0.1)) // Sposta il centro verso il basso (+50)
-          .force("collision", d3.forceCollide().radius((d) => d.r + 5)) // Evita collisioni
+          .force("x", d3.forceX(chartWidth / 2 - 90).strength(0.03))
+          .force("y", d3.forceY(chartHeight / 2 + 50).strength(0.1))
+          .force("collision", d3.forceCollide().radius((d) => d.r + 5))
           .on("tick", ticked);
 
         const nodes = svg
@@ -456,7 +446,7 @@
           .attr("dy", ".3em")
           .attr("text-anchor", "middle")
           .style("fill", "white")
-          .style("font-size", (d) => `${Math.max(d.r / 4, 10)}px`) // Calcola la dimensione del font
+          .style("font-size", (d) => `${Math.max(d.r / 4, 10)}px`)
           .text((d) => d.category);
 
         function ticked() {
@@ -468,7 +458,7 @@
         selectedCategory = category;
 
         const mealListContainer = d3.select("#meal-list");
-        mealListContainer.selectAll("*").remove(); // Rimuovi il contenuto precedente
+        mealListContainer.selectAll("*").remove();
         mealListContainer.style("display", "block");
         mealListContainer
           .append("h3")
@@ -485,7 +475,7 @@
             ul.append("li").text(meal);
           });
         } else {
-          ul.append("li").text("None").attr("id", "none-meal"); // Aggiungi un ID per lo stile
+          ul.append("li").text("None").attr("id", "none-meal");
         }
       }
 

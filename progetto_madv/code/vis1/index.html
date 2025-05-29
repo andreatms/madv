@@ -12,7 +12,7 @@
         margin: 0;
         min-height: 100vh;
         background-color: #f5f5f5;
-        overflow: hidden; /* Prevent scrolling */
+        overflow: hidden; 
       }
 
       .container {
@@ -65,7 +65,7 @@
       }
 
       .zoom-buttons {
-        flex: 0 1 120px; /* Dimensione fissa per i bottoni */
+        flex: 0 1 120px; 
         display: flex;
         flex-direction: column;
         margin-left: -80px;
@@ -162,7 +162,7 @@
       };
 
       function getMappedCountry(mealCountry) {
-          return countryMapping[mealCountry] || mealCountry; // Se non mappato, restituisce il nome originale
+          return countryMapping[mealCountry] || mealCountry;
       }
 
       let mealsByCountry = {};
@@ -210,8 +210,8 @@
       }
 
       function onEachFeature(feature, layer) {
-        let country = feature.properties.name; // Nome del paese nel GeoJSON
-        let mealCount = mealsByCountry[country] || 0; // Usa il count o 0 se non esiste
+        let country = feature.properties.name;
+        let mealCount = mealsByCountry[country] || 0; 
         let mealsList = mealsListByCountry[country] || [];
         
         let popupContent = `<b>${country}</b><br>Meals count: ${mealCount}<br><ul>`;
@@ -235,7 +235,6 @@
         onEachFeature: onEachFeature
       }).addTo(map);
 
-      // Aggiungi una legenda con gradiente lineare
       const legendSvg = d3.select("#map").append("svg")
         .attr("id", "legend")
         .attr("width", 200)
@@ -243,9 +242,8 @@
         .style("position", "absolute")
         .style("bottom", "50px")
         .style("left", "20px")
-        .style("z-index", "1000"); // Assicurati che sia sopra la mappa
+        .style("z-index", "1000"); 
 
-      // Definisci il gradiente lineare
       const gradient = legendSvg.append("defs")
         .append("linearGradient")
         .attr("id", "gradient")
@@ -254,10 +252,9 @@
         .attr("x2", "100%")
         .attr("y2", "0%");
 
-      // Aggiungi i colori al gradiente
       gradient.append("stop")
         .attr("offset", "0%")
-        .attr("stop-color", "#DCDCDC"); // Colore iniziale
+        .attr("stop-color", "#DCDCDC"); 
 
       gradient.append("stop")
         .attr("offset", "20%")
@@ -277,9 +274,8 @@
 
       gradient.append("stop")
         .attr("offset", "100%")
-        .attr("stop-color", "#800026"); // Colore finale
+        .attr("stop-color", "#800026"); 
 
-      // Disegna il rettangolo con il gradiente
       legendSvg.append("rect")
         .attr("x", 10)
         .attr("y", 10)
@@ -287,14 +283,13 @@
         .attr("height", 20)
         .style("fill", "url(#gradient)");
 
-      // Aggiungi l'asse con i valori
       const scale = d3.scaleLinear()
-        .domain([0, 50]) // Cambia il massimo in base ai tuoi dati
+        .domain([0, 50]) 
         .range([10, 190]);
 
       const axis = d3.axisBottom(scale)
         .ticks(6)
-        .tickFormat(d => d === 50 ? `> ${d}` : d); // Mostra "> 50" per il valore massimo
+        .tickFormat(d => d === 50 ? `> ${d}` : d);
 
       legendSvg.append("g")
         .attr("transform", "translate(0, 35)")
@@ -305,14 +300,14 @@
       function updateBarChart(country) {
 
         let data = Object.entries(ingredientsByCountry[country] || {})
-                          .sort((a, b) => b[1] - a[1])  // Ordina per quantità
-                          .slice(0, 5); // Prendi i primi 5
+                          .sort((a, b) => b[1] - a[1])
+                          .slice(0, 5); 
 
         let chartContainer = d3.select("#barchart");
 
         if (data.length === 0){
           chartContainer.classed("hidden", true);
-          map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
+          map.invalidateSize(); 
           return;
         } 
 
@@ -327,19 +322,18 @@
           .append("g")
           .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Aggiungi un titolo al bar chart
         svg.append("text")
           .attr("x", width / 2)
-          .attr("y", -50) // Posiziona il titolo sopra il grafico
+          .attr("y", -50) 
           .attr("text-anchor", "middle")
           .style("font-size", "16px")
           .style("font-weight", "bold")
           .text(`Top 5 Ingredients in ${country}`);
 
-        let localMaxIngredientCount = d3.max(data, d => d[1]) || 1; // Evita problemi se vuoto
+        let localMaxIngredientCount = d3.max(data, d => d[1]) || 1; 
 
         let x = d3.scaleBand()
-          .domain(data.map(d => d[0]))  // Ingredienti
+          .domain(data.map(d => d[0]))
           .range([0, width])
           .padding(0.3);
 
@@ -351,12 +345,11 @@
         svg.append("g")
           .attr("transform", `translate(0,${height})`)
           .call(d3.axisBottom(x))
-          .selectAll("text")  // Ruota i nomi degli ingredienti per leggibilità
+          .selectAll("text")  
           .attr("transform", "rotate(-45)")
           .attr("text-anchor", "end")
           .style("font-size", "12px");
 
-        // Aggiungi etichetta per l'asse x
         svg.append("text")
           .attr("x", width / 2)
           .attr("y", height + margin.bottom - 10)
@@ -367,10 +360,9 @@
           .text("Ingredients");
 
         svg.append("g")
-          .call(d3.axisLeft(y).ticks(6) // Numero massimo di tick
-            .tickFormat(d => Number.isInteger(d) ? d : "")); // Mostra solo numeri interi
+          .call(d3.axisLeft(y).ticks(6) 
+            .tickFormat(d => Number.isInteger(d) ? d : "")); 
 
-        // Aggiungi etichetta per l'asse y
         svg.append("text")
           .attr("transform", "rotate(-90)")
           .attr("x", -height / 2)
@@ -394,10 +386,10 @@
           .attr("fill", "steelblue")
           .on("mouseover", function(event, d) {
               tooltip.style("visibility", "visible")
-                .text(`${d[0]}: ${d[1]}`) // Mostra il nome dell'ingrediente e la quantità
+                .text(`${d[0]}: ${d[1]}`) 
                 .style("left", (event.pageX + 10) + "px")
                 .style("top", (event.pageY - 20) + "px");
-              d3.select(this).attr("fill", "orange"); // Cambia colore per evidenziare
+              d3.select(this).attr("fill", "orange"); 
           })
           .on("mousemove", function(event) {
               tooltip.style("left", (event.pageX + 10) + "px")
@@ -405,23 +397,20 @@
           })
           .on("mouseout", function() {
               tooltip.style("visibility", "hidden");
-              d3.select(this).attr("fill", "steelblue"); // Ripristina il colore originale
+              d3.select(this).attr("fill", "steelblue"); 
           });
 
-      // **Rimuove qualsiasi listener precedente per evitare duplicati**
         document.removeEventListener("click", hideChart);
 
         function hideChart(event) {
           let chartContainer = document.querySelector("#barchart");
-          
-          // Se il click è dentro il barchart o su una nazione, non fare nulla
+        
           if (chartContainer.contains(event.target) || event.target.tagName === "path") {
               return;
           }
 
-          // Altrimenti nascondi il grafico
           chartContainer.classList.add("hidden");
-          map.invalidateSize(); // Aggiorna la mappa per evitare sovrapposizioni
+          map.invalidateSize(); 
         }
 
         document.addEventListener("click", hideChart);    
@@ -441,8 +430,7 @@
 
       function resetView() {
         map.setView([20, 0], 2);
-        //baseLayer.addTo(map); // Re-add the base layer to ensure the map is visible
-        geoJsonLayer.addTo(map); // Re-add the GeoJSON layer to ensure the map is colored
+        geoJsonLayer.addTo(map);
       }
 
     </script>

@@ -1,24 +1,20 @@
 import json
 
-# Percorso del file originale e del file corretto
 meals_path = "progetto_v2/data/meals.json"
 corrected_meals_path = "progetto_v2/data/meals_corrected.json"
 
 ingredients_path = "progetto_v2/data/ingredients.json"
 corrected_ingredients_path = "progetto_v2/data/ingredients_corrected.json"
 
-# Caricamento dei dati
 with open(meals_path, "r", encoding="utf-8") as f:
     meals = json.load(f)
 
 with open(ingredients_path, "r", encoding="utf-8") as f:
     ingredients = json.load(f)
 
-# Correzione delle categorie errate
 for meal_name, meal_data in meals.items():
     if meal_data.get("category", "").strip() == "Desert":
         meals[meal_name]["category"] = "Dessert"
-    # Correzione degli ingredienti nei pasti
     if "ingredients" in meal_data:
         for i, ingredient in enumerate(meal_data["ingredients"]):
             if ingredient.strip() == "Challots":
@@ -28,7 +24,6 @@ for meal_name, meal_data in meals.items():
             elif ingredient.strip() == "Zucchini":
                 meal_data["ingredients"][i] = "Courgettes"
 
-# Correzione degli ingredienti errati
 for i, ingredient in enumerate(ingredients):
     if isinstance(ingredient, dict):
         if ingredient.get("name", "").strip() == "Challots":
@@ -45,13 +40,8 @@ for i, ingredient in enumerate(ingredients):
         elif ingredient.strip() == "Zucchini":
             ingredients.pop(i)
 
-# Salvataggio del file corretto
 with open(corrected_meals_path, "w", encoding="utf-8") as f:
     json.dump(meals, f, indent=4)
 
-print(f"File corretto salvato come {corrected_meals_path}")
-
 with open(corrected_ingredients_path, "w", encoding="utf-8") as f:
     json.dump(ingredients, f, indent=4)
-
-print(f"File corretto salvato come {corrected_ingredients_path}")

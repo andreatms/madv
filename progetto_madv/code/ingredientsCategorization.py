@@ -1,15 +1,11 @@
 import json
 
-# Caricare il file degli ingredienti
 input_file = "data/ingredients.json"
 output_file = "data/categorized_ingredients.json"
-
 
 with open(input_file, "r", encoding="utf-8") as f:
     ingredients = json.load(f)
 
-
-# Definire le categorie di ingredienti
 categories = {
     "Meat": {"Beef", "Chicken", "Turkey", "Lamb", "Veal", "Pork", "Duck Legs", "Sausages", "Ham", "Bacon", "Parma Ham", "Chorizo", 
             "Lamb Kidney", "Black Pudding", "Chicken Breast", "Chicken Thigh", "Lard", "Prosciutto"},
@@ -33,15 +29,9 @@ categories = {
                               "Oil", "Oyster Sauce", "Sunflower Oil", "Tomato Ketchup", "Vegetable Oil", "Dijon Mustard", "Tabasco", "Hotsauce", "Enchilada Sauce", "Passata", "Vinaigrette Dressing", 
                               "Salsa", "Duck Sauce", "Rice Vinegar", "Gochujang", "Vinegar", "Green Curry Paste", "Barbeque Sauce", "Harissa", "Truffle Oil", "Italian Seasoning", "Mirin"},
     "Nuts and Seeds": {"Peanuts", "Almonds", "Walnuts", "Sesame Seed", "Pine nuts", "Pecan Nuts", "Hazlenuts", "Dried Fruit", "Cashews"},
-    #"Sweeteners": {"Sugar", "Honey", "Maple Syrup", "Golden Syrup", "Brown Sugar", "Black Tracle"},
-    #"Stocks": {"Beef Stock", "Chicken Stock", "Fish Stock", "Vegetable Stock"},
-    #"Beverages":{"Red Wine", "White Wine", "Brandy", "Stout", "Sake", "Wine", "Ginger Cordial"},
-    "Others": set()  # Categoria per gli ingredienti non classificati
+    "Others": set()
 }
 
-
-
-# Creare una lista di ingredienti con la categoria associata
 categorized_ingredients = []
 for ingredient in ingredients:
     found = False
@@ -53,7 +43,6 @@ for ingredient in ingredients:
     if not found:
         categorized_ingredients.append({"ingredient": ingredient, "category": "Others"})
 
-# Salvare il nuovo file JSON con i tag di categoria
 with open(output_file, "w", encoding="utf-8") as f:
     json.dump(categorized_ingredients, f, indent=4, ensure_ascii=False)
 
