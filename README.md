@@ -16,7 +16,7 @@ Questo progetto è una dashboard interattiva per l'esplorazione di dati relativi
    Esegui gli script Python in `code/dataCleaning.py` e `code/ingredientsCategorization.py` per generare i file corretti nella cartella `data/`.
 
 2. **Avvio visualizzazioni**  
-   Apri i file HTML in `code/vis1/`, `code/vis2/`, `code/vis3/`, `code/vis4/` per far partire le visualizzazioni.
+   Apri i file HTML in `code/vis1/`, `code/vis2/`, `code/vis3/`, `code/vis4/` per avviare le visualizzazioni.
 
 3. **Dashboard**  
    Apri `code/index.html` per accedere alla dashboard e navigare tra le visualizzazioni.
