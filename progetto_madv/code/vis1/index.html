@@ -244,6 +244,24 @@
         .style("left", "20px")
         .style("z-index", "1000"); 
 
+      legendSvg.append("rect")
+        .attr("x", 40)
+        .attr("y", 60)
+        .attr("width", 120)
+        .attr("height", 60)
+        .attr("fill", "white")
+        .attr("rx", 4)
+        .attr("ry", 4);
+
+      legendSvg.append("text")
+        .attr("x", 100)
+        .attr("y", 8)
+        .attr("text-anchor", "middle")
+        .style("font-size", "10px")
+        .style("font-weight", "bold")
+        .style("fill", "#222")
+        .text("Number of meals");
+
       const gradient = legendSvg.append("defs")
         .append("linearGradient")
         .attr("id", "gradient")
